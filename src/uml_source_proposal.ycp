@@ -25,11 +25,7 @@
 	    UML::propose_selection ();
 	}
 
-	list <map <string, any> > source =
-	    filter (map <string, any> tmp, Pkg::SourceEditGet (),
-		    ``(tmp["SrcId"]:0 == UML::source_id));
-
-	if (size (source) == 1)
+	if (UML::source_id > 0)
 	{
 	    map product_data = Pkg::SourceProductData (UML::source_id);
 	    map general_data = Pkg::SourceGeneralData (UML::source_id);

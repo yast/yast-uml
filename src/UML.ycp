@@ -93,7 +93,8 @@
 	}
 	else
 	{
-	    Report::Error(sformat(_("Cannot create account for user %1"), username));
+	    Report::Error (sformat(_("Cannot create account for user %1"),
+				   username));
 	}
 
 	return ret;
@@ -112,9 +113,8 @@
 
 
     global void propose_selection () ``{
-	list <map <string, any> > sources = Pkg::SourceEditGet ();
-	map <string, any> source = sources[0]:$[];
-	source_id = source["SrcId"]:0;
+	list <integer> sources = Pkg::SourceGetCurrent (false);
+	source_id = sources[0]:0;
     }
 
 

@@ -18,11 +18,10 @@
     string title = _("Installation Source");
 
 
-    list <map <string, any> > sources = Pkg::SourceEditGet ();
+    list <integer> sources = Pkg::SourceGetCurrent (false);
 
 
-    define term create_item (integer index, map source) ``{
-        integer id = source["SrcId"]:0;
+    define term create_item (integer index, integer id) ``{
         map product_data = Pkg::SourceProductData (id);
         map general_data = Pkg::SourceGeneralData (id);
         return `item (`id (index),
@@ -39,9 +38,8 @@
 
         while (i < size (sources))
 	{
-	    map source = sources[i]:$[];
-	    items = add (items, create_item (i, source));
-	    if (source["SrcId"]:0 == UML::source_id)
+	    items = add (items, create_item (i, sources[i]:0));
+	    if (sources[i]:0 == UML::source_id)
 		j = i;
 	    i = i + 1;
         }
@@ -91,8 +89,7 @@
 	{
 	    integer current = (integer) UI::QueryWidget (`id(`sources),
 							 `CurrentItem);
-	    map <string, any> source = sources[current]:$[];
-            UML::source_id = source["SrcId"]:0;
+            UML::source_id = sources[current]:0;
 	    break;
 	}
     }
