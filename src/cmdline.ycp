@@ -30,14 +30,14 @@
 
 	// calling inst_proposal
 	symbol ret = (symbol) WFM::CallFunction ("inst_proposal", 
-                [GetInstArgs::makeProposalArgs(true,true,"uml")]);
+                [GetInstArgs::ButtonsProposal(true,true,"uml")]);
 
 	if (ret == `next)
 	{
 	    while (WFM::CallFunction ("inst_uml_kickoff", [false, false]) == `abort)
 	    {
 		// start proposal again if installation was aborted
-		WFM::CallFunction ("inst_proposal", [true, true, `uml]);
+		WFM::CallFunction ("inst_proposal", [GetInstArgs::ButtonsProposal(true,true,"uml")]);
 	    }
 	}
 
