@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 29 18:07:41 CEST 2004 - arvin@suse.de
+
+- adapted to changes in yast2-users
+
+-------------------------------------------------------------------
 Mon Mar 22 19:58:28 CET 2004 - arvin@suse.de
 
 - implemented setting of activation mode
