@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar 21 16:58:05 CET 2005 - lslezak@suse.cz
+
+- enable access to X server for uml user, copy correct uml kernel
+  and initrd files (#74043)
+- 2.11.4
+
+-------------------------------------------------------------------
 Mon Feb  7 17:54:46 CET 2005 - lslezak@suse.cz
 
 - merged proofread texts
