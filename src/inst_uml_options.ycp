@@ -27,9 +27,18 @@
 						    _("Memory size in MB:"),
 						    ["128", "256", "512", "1024", "2048"])),
 				    `Left(`ComboBox(`id(`ncpus), `opt(`editable),
-						    // combobxo label
+						    // combobox label
 						    _("Number of CPU's:"),
-						    ["1", "2", "4"]))
+						    ["1", "2", "4"])),
+				    `Left(`ComboBox(`id(`startmode),
+						    // combobox label
+						    _("Activation"),
+						    [
+						     // combobox item
+						     `item(`id("manual"), _("Manually")),
+						     // combobox item
+						     `item(`id("onboot"), _("On Boot")),
+						     ]))
 				    )
 			      );
 
@@ -46,6 +55,8 @@
     UI::ChangeWidget (`id(`ncpus), `ValidChars, "0123456789");
     UI::ChangeWidget (`id(`ncpus), `Value, tostring (UML::number_of_cpus));
 
+    UI::ChangeWidget (`id(`startmode), `Value, UML::start_mode);
+
     any ret = nil;
 
     while (true)
@@ -59,6 +70,7 @@
 	{
 	    integer tmp1 = tointeger ((string) UI::QueryWidget (`id(`memory), `Value));
 	    integer tmp2 = tointeger ((string) UI::QueryWidget (`id(`ncpus), `Value));
+	    string tmp3 = (string) UI::QueryWidget (`id(`startmode), `Value);
 
 	    if (tmp1 == nil || tmp1 <= 0)
 	    {
@@ -78,6 +90,7 @@
 
 	    UML::memory_size = tmp1;
 	    UML::number_of_cpus = tmp2;
+	    UML::start_mode = tmp3;
 
 	    break;
 	}

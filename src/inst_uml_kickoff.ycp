@@ -92,6 +92,8 @@
 	SCR::Write (add (umlpath, "MEMORY"), UML::memory_size);
 	SCR::Write (add (umlpath, "NCPUS"), UML::number_of_cpus);
 
+	SCR::Write (add (umlpath, "STARTMODE"), UML::start_mode);
+
 	SCR::Write (add (umlpath, "USERNAME"), UML::username);
 	SCR::Write (add (umlpath, "HOMEDIR"), UML::homedir);
 

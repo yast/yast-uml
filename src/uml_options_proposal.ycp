@@ -20,16 +20,11 @@
 	boolean force_reset      = param["force_reset"     ]:false;
 	boolean language_changed = param["language_changed"]:false;
 
-	// call some function that makes a proposal here:
-	//
-	// DummyMod::MakeProposal( force_reset );
-
-	// Fill return map
-
 	if (force_reset)
 	{
 	    UML::memory_size = 256;
 	    UML::number_of_cpus = 1;
+	    UML::start_mode = "manual";
 	}
 
 	list<string> tmp = [];
@@ -37,8 +32,15 @@
 	// Proposal for uml installation
 	tmp = add (tmp, sformat (_("Memory size: %1 MB"), UML::memory_size));
 
-	// Proposal for backup during update
+	// Proposal for uml installation
 	tmp = add (tmp, sformat (_("Number of CPUs: %1"), UML::number_of_cpus));
+
+	// name for activation mode in uml installation proposal
+	map start_mode_names = $[ "manual" : _("Manually"), "onboot" : _("On Boot") ];
+
+	// Proposal for uml installation
+	tmp = add (tmp, sformat (_("Activation: %1"),
+				 start_mode_names[UML::start_mode]:"unknown"));
 
 	ret = $[ "preformatted_proposal" :
 		 HTML::List (tmp)
@@ -48,24 +50,13 @@
     {
 	boolean has_next = param["has_next"]:false;
 
-	// call some function that displays a user dialog
-	// or a sequence of dialogs here:
-	//
-	// sequence = DummyMod::AskUser( has_next );
-
 	symbol result = (symbol) WFM::CallFunction ("inst_uml_options",
 						    [true, has_next]);
-
-	// Fill return map
 
 	ret = $[ "workflow_sequence" : result ];
     }
     else if ( func == "Description" )
     {
-	// Fill return map.
-	//
-	// Static values do just nicely here, no need to call a function.
-
 	ret =
 	    $[
 	      // this is a heading
