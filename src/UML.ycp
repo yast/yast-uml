@@ -72,7 +72,8 @@
 	    "userPassword"  : "",
 	    "create_home"   : true,
 	    "loginShell"    : "/bin/false",
-	    "username"      : username,
+//	    "username"      : username, yast2-users changed internal key name...
+	    "uid"           : username,
 	    "type"          : "local"
 	];
 
