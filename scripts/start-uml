@@ -14,6 +14,8 @@ done
 UML_ARGS="$UML_ARGS initrd=./$INITRD"
 UML_ARGS="$UML_ARGS hwprobe=-sys"
 
+UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS"
+
 if true ; then	# for installation
 
     UML_ARGS="$UML_ARGS ramdisk_size=65536"
@@ -28,4 +30,15 @@ UML_ARGS="$UML_ARGS $EXTRA_ARGS"
 
 echo $KERNEL $UML_ARGS
 
-./$KERNEL $UML_ARGS $*
+# Create TAP device
+/usr/bin/tunctl -t $TAP_DEVICE -u $USERNAME
+
+# start uml_switch daemon
+/usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null &
+
+# enable UML user access to X session
+/usr/X11R6/bin/xauth -f ./.Xauthority merge ~/.Xauthority
+chown $USERNAME:users ./.Xauthority
+
+# start UML machine
+/bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
