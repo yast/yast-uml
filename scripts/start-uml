@@ -4,6 +4,8 @@ echo "Parsing $1..."
 . $1
 shift
 
+export LD_ASSUME_KERNEL="2.4.21"
+
 # set installation/run mode
 echo $* | grep "install=" > /dev/null
 UML_RUN_MODE=$?
