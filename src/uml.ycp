@@ -23,6 +23,7 @@
 
     // create initial dialog
     Wizard::CreateDialog ();
+    Wizard::SetDesktopIcon("uml");
 
     // calling inst_proposal
     symbol ret = (symbol) WFM::CallFunction ("inst_proposal", [true, true, `uml]);
