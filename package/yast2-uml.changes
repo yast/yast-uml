@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Apr 16 15:37:10 CEST 2004 - lslezak@suse.cz
+
+- added help texts
+- installation source module can be started
+- propose and allow to use only network installation sources
+- version 2.9.10
+
+-------------------------------------------------------------------
 Fri Apr 02 15:59:59 CEST 2004 - arvin@suse.de
 
 - finally changed license to GPL for good
