@@ -142,6 +142,8 @@
 	    // don't show progress
 	    Users::SetGUI(false);
 	    ret = Users::Write() == "";
+	    // enable reporting of errors
+	    Users::SetGUI(true);
 	}
 	else
 	{
