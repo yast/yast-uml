@@ -16,5 +16,5 @@ install-sh
 missing
 mkinstalldirs
 stamp-h
-UML.pot
+uml.pot
 autom4te.cache
