@@ -2,12 +2,26 @@
 
 . OPTIONS
 
-UML_ARGS="mem=${MEMORY}m ncups=${NCPUS}"
+UML_ARGS="umid=${USERNAME}"
+
+UML_ARGS="$UML_ARGS mem=${MEMORY}m ncups=${NCPUS}"
 
 for i in `seq 0 $(($NDISKS - 1))` ; do
     eval d=\$DISK$i
     UML_ARGS="$UML_ARGS ubd$i=$d"
 done
 
-echo $UML_ARGS
+UML_ARGS="$UML_ARGS initrd=./$INITRD"
+
+UML_ARGS="$UML_ARGS con=pty ssl=none ssl0=xterm console=ttyS0"
+
+UML_ARGS="$UML_ARGS con3=xterm"
+
+UML_ARGS="$UML_ARGS hwprobe=-sys"
+
+UML_ARGS="$UML_ARGS $EXTRA_ARGS"
+
+echo $KERNEL $UML_ARGS
+
+./$KERNEL $UML_ARGS $*
 
