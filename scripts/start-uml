@@ -4,8 +4,9 @@ echo "Parsing $1..."
 . $1
 shift
 
+set -x
 # set installation/run mode
-echo $* | grep "installation=" > /dev/null
+echo $* | grep "install=" > /dev/null
 UML_RUN_MODE=$?
 
 
@@ -23,16 +24,15 @@ UML_ARGS="$UML_ARGS hwprobe=-sys"
 
 UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
 
-if [ $UML_RUN_MODE == "0" ]; then	# for installation
+if [ $UML_RUN_MODE == 0 ]; then	# for installation
 
     UML_ARGS="$UML_ARGS ramdisk_size=65536"
     UML_ARGS="$UML_ARGS rootfstype=minix"
 
-    UML_ARGS="$UML_ARGS con=pty ssl=none ssl0=xterm console=ttyS0"
-    UML_ARGS="$UML_ARGS con3=xterm"
+    UML_ARGS="$UML_ARGS con=pty con0=xterm con2=xterm con3=xterm con4=xterm ssl=none"
 else
     # runtime mode
-    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE"
+    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE ssl=none"
 fi
 
 UML_ARGS="$UML_ARGS $EXTRA_ARGS"
@@ -90,14 +90,12 @@ chown $USERNAME ./.Xauthority
 
 # start UML machine
 echo "Starting uml..."
-# TODO FIXME
 /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
 
 
 # TODO start second stage in the installation mode
 if [ $UML_RUN_MODE == "0" ]; then
-    # TODO set root parameter
-    # start second stage 
+    # start second stage
     /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
 fi
 
