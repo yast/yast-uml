@@ -21,3 +21,4 @@ Exec=/sbin/yast2 uml
 
 Name=UML Installation
 GenericName=Install a UML system
+X-KDE-SubstituteUID=true
