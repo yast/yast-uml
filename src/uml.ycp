@@ -10,15 +10,9 @@
 {
     textdomain "uml";
 
-    import "Mode";
     import "Wizard";
     import "Report";
     import "Arch";
-
-    // set normal mode and update
-    // Mode::normal = true;
-    // Mode::installation = false;
-    // Mode::update = false;
 
     // wizard stage
     integer current_stage = -1;

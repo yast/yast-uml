@@ -258,7 +258,7 @@
     /**
      *
      */
-    define void start_uml () ``{
+    define void start_uml (string uml_command) ``{
 
 	string url = "";
 
@@ -276,55 +276,27 @@
 	    url = "slp://";
 	}
 
-	string uml_command = "cd " + UML::homedir + " ; " +
-	    Directory::ybindir + "/start-uml " +
-	    "/etc/sysconfig/uml/" + UML::username + ".conf";
-
 	y2milestone("Starting first installation stage (%1)...", uml_command + " install=" + url);
+	SCR::Execute (.target.bash, uml_command + " install=" + url);
 
-	// use background agent, don't store output from subprocess
-	SCR::Execute (.background.run, uml_command +
-		      " install=" + url);
-
-	integer query = 0;
+	map out = (map) SCR::Execute(.target.bash_output, sformat("/bin/grep \" / \" %1 | /usr/bin/cut -f 1 -d \" \"",  UML::homedir + "/mtab"));
 	string root_device = "";
-	integer counter = 0;
 
-	while((boolean)SCR::Read(.background.output_open))
+	if (out["exit"]:-1 == 0 )
 	{
-	    sleep(1000);     // wait 1 second
-
-	    // check mounted devices every 15 seconds
-	    if (counter == 15)
-	    {
-		query = query + 1;
-
-		y2debug("Query: %1", query);
-		// use mconsole to get content of /proc/mounts file
-		string cmd = "/usr/bin/uml_mconsole " + UML::homedir + "/.uml/" + UML::username + "/mconsole proc mounts 2> /dev/null";
-		map out = (map)SCR::Execute(.target.bash_output, cmd);
-		string stdout = (string) out["stdout"]:"";
-
-		// search for /mnt mount point
-		string root = FindRootDevice(stdout);
-
-		if (root != "" && root_device != root)
-		{
-		    root_device = root;
-		    y2milestone("Detected root device: %1", root_device);
-		}
-
-		counter = 0;
-	    }
-	    else
-	    {
-		counter = counter + 1;
-	    }
+	     root_device = (string) (out["stdout"]:"");
+	     list<string> root_dev_list = splitstring(root_device, "\n");
+	     root_device = root_dev_list[0]:"";
 	}
+
+	y2milestone("UML root device: %1", root_device);
 
 	// write detected root device to sysconfig file
 	WriteRootDevice(root_device);
+    }
 
+
+    define void start_uml_2ndstage(string uml_command) {
 	string file_name = UML::homedir + "/initrd.inst";
 
 	// check existence of renamed original initrd file - if it
@@ -344,7 +316,6 @@
 	    Report::Error(_("UML installation failed or was aborted."));
 	}
     }
-
 
     define boolean set_tun_permissions() ``{
 	boolean ret = false;
@@ -392,7 +363,9 @@
 				     // progress stages
 				     _("Copy kernel and initrd"),
 				     // progress stages
-				     _("Start UML installation")
+				     _("Start UML installation"),
+				     // progress stages
+				     _("Finish UML installation")
     ];
 
     list progress_descriptions = [];
@@ -451,7 +424,15 @@
 
     Progress::NextStage ();
 
-    start_uml ();
+    string uml_command = "cd " + UML::homedir + " ; " +
+	Directory::ybindir + "/start-uml " +
+	"/etc/sysconfig/uml/" + UML::username + ".conf";
+
+    start_uml (uml_command);
+
+    Progress::NextStage ();
+
+    start_uml_2ndstage(uml_command);
 
     Progress::Finish ();
 
