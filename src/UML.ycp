@@ -97,7 +97,7 @@
 
 	    // don't show progress
 	    Users::SetGUI(false);
-	    ret = Users::Write();
+	    ret = Users::Write() != "";
 	}
 	else
 	{
