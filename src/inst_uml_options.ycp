@@ -26,10 +26,12 @@
 						    // combobox label
 						    _("Memory size in MB:"),
 						    ["128", "256", "512", "1024", "2048"])),
-				    `Left(`ComboBox(`id(`ncpus), `opt(`editable),
-						    // combobox label
-						    _("Number of CPU's:"),
-						    ["1", "2", "4"])),
+// UML currently doesn't support SMP
+//
+//				    `Left(`ComboBox(`id(`ncpus), `opt(`editable),
+//						    // combobox label
+//						    _("Number of CPU's:"),
+//						    ["1", "2", "4"])),
 				    `Left(`ComboBox(`id(`startmode),
 						    // combobox label
 						    _("Activation"),

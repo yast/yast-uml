@@ -33,7 +33,8 @@
 	tmp = add (tmp, sformat (_("Memory size: %1 MB"), UML::memory_size));
 
 	// Proposal for uml installation
-	tmp = add (tmp, sformat (_("Number of CPUs: %1"), UML::number_of_cpus));
+// UML currently doesn't support SMP
+//	tmp = add (tmp, sformat (_("Number of CPUs: %1"), UML::number_of_cpus));
 
 	// name for activation mode in uml installation proposal
 	map start_mode_names = $[ "manual" : _("Manually"), "onboot" : _("On Boot") ];
