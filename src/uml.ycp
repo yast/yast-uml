@@ -12,6 +12,8 @@
 
     import "Mode";
     import "Wizard";
+    import "Report";
+    import "Arch";
 
     // set normal mode and update
     // Mode::normal = true;
@@ -25,12 +27,40 @@
     Wizard::CreateDialog ();
     Wizard::SetDesktopIcon ("uml");
 
+    if (Arch::is_uml == true)
+    {
+	// we are already in UML, for nested UML we would need
+	// nested UML kernel (CONFIG_NEST_LEVEL=1) which is not present
+	Report::Error(_("UML installation cannot be started inside UML machine.
+Please start UML installation in the host system."));
+
+	Wizard::CloseDialog ();
+	return `abort;
+    }
+
+    // check whether X window system is accessible
+    // UML kernel starts xterm subprocesses, when there is no X it hangs!
+    integer exit_status = (integer) SCR::Execute(.target.bash, "/usr/X11R6/bin/xdpyinfo");
+    y2milestone("X check exit status: %1", exit_status);
+
+    if (exit_status != 0)
+    {
+	Report::Error(_("UML installation requires access to a graphical environment."));
+
+	Wizard::CloseDialog ();
+	return `abort;
+    }
+
     // calling inst_proposal
     symbol ret = (symbol) WFM::CallFunction ("inst_proposal", [true, true, `uml]);
 
     if (ret == `next)
     {
-	WFM::CallFunction ("inst_uml_kickoff", [false, false]);
+	while (WFM::CallFunction ("inst_uml_kickoff", [false, false]) == `abort)
+	{
+	    // start proposal again if installation was aborted
+	    WFM::CallFunction ("inst_proposal", [true, true, `uml]);
+	}
     }
 
     Wizard::CloseDialog ();

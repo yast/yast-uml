@@ -13,6 +13,7 @@
     import "Progress";
     import "Report";
     import "Package";
+    import "Service";
 
 
     textdomain "uml";
@@ -29,7 +30,9 @@
 	if (!Package::InstallAll (["um-host-kernel",
 				   "um-host-install-initrd",
 				   "uml-utilities",
-				   "bridge-utils"]))
+				   "bridge-utils",
+				   "xf86tools"
+				   ]))
 	{
 	    Report::Error (_("Cannot install required packages."));
 	    return false;
@@ -46,7 +49,7 @@
 
 	if (!UML::CreateUser())
 	{
-	    Report::Error (sformat (_("Cannot create UML user %1"),
+	    Report::Error (sformat (_("Cannot create UML user %1."),
 				    UML::username));
 	    return false;
 	}
@@ -104,7 +107,8 @@
 	// connect virtual UML ethernet device to real device UML::eth_device
 	SCR::Write (add (umlpath, "ETH_DEVICE"), UML::eth_device);
 
-	SCR::Write (add (umlpath, "EXTRA_ARGS"), "");
+	// set default option - disable SELinux
+	SCR::Write (add (umlpath, "EXTRA_ARGS"), "selinux=0");
 
     }
 
@@ -117,6 +121,7 @@
 	SCR::Write (add (umlpath, "NDISKS"), size (UML::disks));
 
 	integer i = 0;
+	boolean ret = true;
 	foreach (integer s, UML::disks, ``{
 
 	    string disk_file = sformat ("ubd%1", i);
@@ -125,19 +130,29 @@
 
 	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" +
 		disk_file + " bs=1M " + sformat ("count=%1", s);
-	    SCR::Execute (.target.bash, cmd);
+	    integer result = (integer) SCR::Execute (.target.bash, cmd);
 
-	    SCR::Execute (.target.bash, sformat ("/bin/chown %1:users %2/%3",
-						 UML::username, UML::homedir,
-						 disk_file));
-	    SCR::Execute (.target.bash, sformat ("/bin/chmod 0600 %1/%2",
-						 UML::homedir, disk_file));
+	    if (result != 0)
+	    {
+		// dd failed, maybe no space left on disk?
+		// try to remove failed image if it exists
+		SCR::Execute (.target.bash, "rm " + UML::homedir + "/" + disk_file);
+		ret = false;
+	    }
+	    else
+	    {
+		SCR::Execute (.target.bash, sformat ("/bin/chown %1:users %2/%3",
+						     UML::username, UML::homedir,
+						     disk_file));
+		SCR::Execute (.target.bash, sformat ("/bin/chmod 0600 %1/%2",
+						     UML::homedir, disk_file));
+	    }
 
 	    i = i + 1;
 
 	});
 
-	return true;
+	return ret;
     }
 
 
@@ -209,40 +224,23 @@
 	SCR::Execute (.target.bash, uml_command +
 		      " install=" + url);
 
+	string file_name = UML::homedir + "/initrd.inst";
 
-	// set root option and start second installation stage
-	register_options_file();
-
-	string root_file_name = UML::homedir + "root_dev";
-
-	// check existence of mtab file - if it doesn't exists
-	// then do not start second stage - installation probably failed
-	integer sz = (integer)SCR::Read(.target.size, root_file_name);
+	// check existence of renamed original initrd file - if it
+	// doesn't exists then do not start second stage - installation
+	// probably failed or was aborted
+	integer sz = (integer)SCR::Read(.target.size, file_name);
 
 	if (sz > 0)
 	{
-	    map out = (map) SCR::Execute(.target.bash_output, "/usr/bin/cut -f 1 -d \" \"", root_file_name);
-	    string root_dev = "";
-
-	    if (out["exit"]:-1 != 0 )
-	    {
-		 root_dev = (string) (out["stdout"]:"");
-		 list<string> root_dev_list = splitstring(root_dev, "\n");
-		 root_dev = root_dev_list[0]:"";
-
-		 // remove mtab file
-		SCR::Execute (.target.bash, "/bin/rm " + root_file_name);
-	    }
-
-	    y2milestone("UML root device: %1", root_dev);
-	    SCR::Write (add (umlpath, "UML_ROOT_DEVICE"), "linux");
-
-	    unregister_options_file();
-
 	    y2milestone("Starting second installation stage...");
 
 	    // add empty install command
-	    SCR::Execute (.target.bash, uml_command + "install=");
+	    SCR::Execute (.target.bash, uml_command + " install=");
+	}
+	else
+	{
+	    Report::Error(_("UML installation failed or was aborted."));
 	}
     }
 
@@ -262,6 +260,22 @@
 	}
 
 	return ret;
+    }
+
+    /**
+     * Enable uml service if start mode is "onboot"
+     */
+    define boolean enable_uml_service() ``{
+	if (UML::start_mode == "onboot")
+	{
+	    boolean ret = Service::Finetune("uml", ["3", "5"]);
+	    if (ret == false)
+	    {
+		Report::Warning(_("Enabling service 'uml' failed."));
+	    }
+	}
+
+	return true;
     }
 
 
@@ -297,22 +311,36 @@
     Progress::New (headline, "", progress_length,
 		   progress_stages, progress_descriptions, help_text);
 
-    install_packages ();
+    Progress::NextStage ();
+
+    if (install_packages() == false)
+    {
+	return `abort;
+    }
 
     Progress::NextStage ();
 
-    create_user ();
+    if (create_user () == false)
+    {
+	return `abort;
+    }
+
     set_tun_permissions();
 
     Progress::NextStage ();
 
     register_options_file ();
-
     save_options ();
+    enable_uml_service();
 
     Progress::NextStage ();
 
-    make_disks ();
+    if (make_disks() == false)
+    {
+	//TODO later: replace reused string with better one
+	Report::Error(_("UML installation failed or was aborted."));
+	return `abort;
+    }
 
     Progress::NextStage ();
 
@@ -322,10 +350,9 @@
 
     Progress::NextStage ();
 
-    Progress::Finish ();
-
     start_uml ();
 
+    Progress::Finish ();
 
     return `next;
 }

@@ -11,7 +11,6 @@
 
     import "UML";
     import "HTML";
-    import "Users";
 
     string func = (string) WFM::Args (0);
     map param = (map) WFM::Args (1);
@@ -33,9 +32,9 @@
 
 	proposal = [
 	    // Proposal item - TAP device name
-	    sformat (_("Network device: %1"), UML::tap_device),
+	    sformat (_("Network Device: %1"), UML::tap_device),
 	    // Proposal item - MAC adress of network card in the virtual machine
-	    sformat (_("MAC address of virtual network card: %1"), UML::MAC_address),
+	    sformat (_("MAC Address of Virtual Network Card: %1"), UML::MAC_address),
 	];
 
 	ret = $[ "preformatted_proposal" :

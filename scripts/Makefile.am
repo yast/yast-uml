@@ -2,4 +2,7 @@
 
 ybin_SCRIPTS = start-uml
 
-EXTRA_DIST = $(ybin_SCRIPTS)
+initscriptdir=/etc/init.d
+initscript_SCRIPTS = uml
+
+EXTRA_DIST = $(ybin_SCRIPTS) $(initscript_SCRIPTS)

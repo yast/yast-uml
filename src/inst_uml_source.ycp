@@ -70,9 +70,9 @@
 			  );
 
     // help text for backup dialog during update 1/7
-    string help_text = _("<P><B>Installation source</B></P>")
-    + _("<P>Select installation source from which will be UML machine installed.</P>")
-    + _("<P>Only network installation sources are supported (e.g. FTP, NFS,...) in UML installation.</P>");
+    string help_text = _("<P><B>Installation Source</B></P>")
+    + _("<P>Select the installation source from which to install the UML machine.</P>")
+    + _("<P>Only network installation sources are supported (e.g., FTP or NFS) in UML installation.</P>");
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));

@@ -24,13 +24,13 @@
 			      `VBox(
 				    `Left(`ComboBox(`id(`memory), `opt(`editable),
 						    // combobox label
-						    _("Memory size in MB:"),
-						    ["128", "256", "512", "1024", "2048"])),
+						    _("Memory Size in MB:"),
+						    ["256", "512"])),
 // UML currently doesn't support SMP
 //
 //				    `Left(`ComboBox(`id(`ncpus), `opt(`editable),
 //						    // combobox label
-//						    _("Number of CPU's:"),
+//						    _("Number of CPUs:"),
 //						    ["1", "2", "4"])),
 				    `Left(`ComboBox(`id(`startmode),
 						    // combobox label
@@ -49,11 +49,11 @@
 
     // help text for uml options
     string help_text = _("<P><B>Options</B></P>")
-    + _("<P>You can set how much host system memory will be used by virtual machine.</P>")
-    + _("<P>UML machine can be started automatically on boot or manually when needed.</P>")
-    + sformat(_("<P>Use <I>%1</I> script for starting or stopping virtual machines or set
-start mode <I>on boot</I> for automatic start.</P>"), script_name)
-    ;
+    + _("<P>Set how much host system memory will be used by the virtual machine.</P>")
+    + _("<P>The UML machine can be started automatically on boot or manually when needed.</P>")
+    + sformat(_("<P>Use the <I>%1</I> script for starting or stopping virtual machines or set
+start mode <I>on boot</I> for automatic start.</P>
+"), script_name);
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));
@@ -92,7 +92,7 @@ start mode <I>on boot</I> for automatic start.</P>"), script_name)
 //	    if (tmp2 == nil || tmp2 <= 0)
 //	    {
 //		// error popup
-//		string message = _("Invalid number of CPU's.");
+//		string message = _("Invalid number of CPUs.");
 //		Popup::Message (message);
 //		continue;
 //	    }

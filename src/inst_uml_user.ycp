@@ -42,7 +42,7 @@
     );
 
     // help text for uml user settings
-    string help_text = _("<p><b>User Settings</b></p><br><p>Here you can set UML user account.</p>")
+    string help_text = _("<p><b>User Settings</b></p><br><p>Here, set the UML user account.</p>")
 	+ _("<p>Kernel and disk image will be stored in the <b>home directory</b> of the UML user.</p>")
     ;
 
