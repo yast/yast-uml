@@ -83,6 +83,9 @@
 
 	SCR::Write (add (umlpath, "USERNAME"), UML::username);
 
+	SCR::Write (add (umlpath, "TAP_DEVICE"), UML::tap_device);
+	SCR::Write (add (umlpath, "MAC_ADDRESS"), UML::MAC_address);
+
 	SCR::Write (add (umlpath, "EXTRA_ARGS"), "");
 
     }
