@@ -1,0 +1,29 @@
+@HEADER-COMMENT@
+# neededforbuild yast2-devel-packages yast2-perl-bindings perl-Digest-SHA1 perl-gettext yast2-users
+
+@HEADER@
+Requires:	yast2
+
+BuildArchitectures:	noarch
+
+Summary:	Configuration of UML
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+@clientdir@/uml*.ycp
+@clientdir@/inst_uml*.ycp
+@moduledir@/UML.*
+@desktopdir@/uml.desktop
+@ybindir@/start-uml
+%doc @docdir@
