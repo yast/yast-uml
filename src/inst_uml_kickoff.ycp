@@ -107,8 +107,7 @@
 	// connect virtual UML ethernet device to real device UML::eth_device
 	SCR::Write (add (umlpath, "ETH_DEVICE"), UML::eth_device);
 
-	// set default option - disable SELinux
-	SCR::Write (add (umlpath, "EXTRA_ARGS"), "selinux=0");
+	SCR::Write (add (umlpath, "EXTRA_ARGS"), UML::extra_args);
 
     }
 

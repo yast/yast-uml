@@ -46,6 +46,9 @@
 	tmp = add (tmp, sformat (_("Activation: %1"),
 				 start_mode_names[UML::start_mode]:"unknown"));
 
+	// part of proposal text
+	tmp = add (tmp, sformat (_("Boot options: %1"), UML::extra_args));
+
 	ret = $[ "preformatted_proposal" :
 		 HTML::List (tmp)
 	];

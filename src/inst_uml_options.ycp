@@ -43,11 +43,11 @@
 						     `item(`id("manual"), _("Manually")),
 						     // combobox item
 						     `item(`id("onboot"), _("On Boot")),
-						     ]))
+						     ])),
+				    `Left(`TextEntry(`id(`bootopts), _("Boot &Options"), UML::extra_args))
 				    )
 			      );
 
-    // TODO: set to real script
     string script_name = "/etc/init.d/uml";
 
     // help text for uml options
@@ -56,7 +56,8 @@
     + _("<P>The UML machine can be started automatically on boot or manually when needed.</P>")
     + sformat(_("<P>Use the <I>%1</I> script for starting or stopping virtual machines or set
 start mode <I>on boot</I> for automatic start.</P>
-"), script_name);
+"), script_name)
+    + _("<P><I>Boot Options</I> are used as extra arguments for UML kernel.</P>");
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));
@@ -83,6 +84,7 @@ start mode <I>on boot</I> for automatic start.</P>
 	    integer tmp1 = tointeger ((string) UI::QueryWidget (`id(`memory), `Value));
 //	    integer tmp2 = tointeger ((string) UI::QueryWidget (`id(`ncpus), `Value));
 	    string tmp3 = (string) UI::QueryWidget (`id(`startmode), `Value);
+	    string boot = (string) UI::QueryWidget (`id(`bootopts), `Value);
 
 	    if (tmp1 == nil || tmp1 <= 0)
 	    {
@@ -103,6 +105,7 @@ start mode <I>on boot</I> for automatic start.</P>
 	    UML::memory_size = tmp1;
 //	    UML::number_of_cpus = tmp2;
 	    UML::start_mode = tmp3;
+	    UML::extra_args = boot;
 
 	    break;
 	}
