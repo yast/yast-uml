@@ -213,6 +213,8 @@
 	// set root option and start second installation stage
 	register_options_file();
 
+	// TODO check existence of mtab file - if it doesn't exists do not start second stage
+
 	map out = (map) SCR::Execute(.target.bash_output, "/bin/grep \" / \" %1 | cut -f 1 -d \" \"",  UML::homedir + "/mtab");
 	string root_dev = "";
 
@@ -221,6 +223,8 @@
 	     root_dev = (string) (out["stdout"]:"");
 	     list<string> root_dev_list = splitstring(root_dev, "\n");
 	     root_dev = root_dev_list[0]:"";
+
+	     // TODO remove mtab file
 	}
 
 	y2milestone("UML root device: %1", root_dev);
