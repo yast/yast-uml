@@ -421,7 +421,7 @@
     if (make_disks() == false)
     {
 	// popup error message
-	Report::Error(_("An error occured during creating disk image."));
+	Report::Error(_("An error occurred while creating the disk image."));
 	return `abort;
     }
 

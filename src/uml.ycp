@@ -40,7 +40,7 @@
 	    "user" : $[
 		"type"      : "string",
 		// option description
-		"help"      : _("Set username which runsStart UML ")
+		"help"      : _("Set the username that runs UML ")
 	    ],
 	    "home" : $[
 		"type"      : "string",
@@ -75,7 +75,7 @@
 	    "netif" : $[
 		"type"      : "string",
 		// option description
-		"help"      : _("Connect UML to this network interface (eth0, eth1,...)")
+		"help"      : _("Connect UML to this network interface (eth0, eth1, etc.)")
 	    ]
 	],
 	"mappings" : $[

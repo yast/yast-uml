@@ -57,7 +57,7 @@
     + sformat(_("<P>Use the <I>%1</I> script for starting or stopping virtual machines or set
 start mode <I>on boot</I> for automatic start.</P>
 "), script_name)
-    + _("<P><I>Boot Options</I> are used as extra arguments for UML kernel.</P>");
+    + _("<P><I>Boot Options</I> are used as extra arguments for the UML kernel.</P>");
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));
