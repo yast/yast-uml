@@ -4,7 +4,6 @@ echo "Parsing $1..."
 . $1
 shift
 
-set -x
 # set installation/run mode
 echo $* | grep "install=" > /dev/null
 UML_RUN_MODE=$?
@@ -84,21 +83,15 @@ brctl show | grep ^$ETH_DEVICE > /dev/null || (
 # start uml_switch daemon
 /bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null < /dev/null" $USERNAME &
 
-# enable UML user access to X session
-/usr/X11R6/bin/xauth -f ./.Xauthority merge ~/.Xauthority
-chown $USERNAME ./.Xauthority
+if [ $UML_RUN_MODE == "0" ]; then
+    # enable UML user access to X session at installation
+    /usr/X11R6/bin/xauth -f ./.Xauthority merge ~/.Xauthority
+    chown $USERNAME ./.Xauthority
+fi
 
 # start UML machine
 echo "Starting uml..."
 /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
-
-
-# TODO start second stage in the installation mode
-if [ $UML_RUN_MODE == "0" ]; then
-    # start second stage
-    /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
-fi
-
 
 # stop network devices
 

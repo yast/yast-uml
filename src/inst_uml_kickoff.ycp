@@ -201,11 +201,35 @@
 	map general_data = Pkg::SourceGeneralData (UML::source_id);
 	string url = general_data["url"]:"";
 
-	SCR::Execute (.target.bash, "cd " + UML::homedir + " ; " +
-		      Directory::ybindir + "/start-uml " +
-		      "/etc/sysconfig/uml/" + UML::username + ".conf" +
+	string uml_command = "cd " + UML::homedir + " ; " +
+	    Directory::ybindir + "/start-uml " +
+	    "/etc/sysconfig/uml/" + UML::username + ".conf";
+
+	y2milestone("Starting first installation stage...");
+	SCR::Execute (.target.bash, uml_command +
 		      " install=" + url);
 
+
+	// set root option and start second installation stage
+	register_options_file();
+
+	map out = (map) SCR::Execute(.target.bash_output, "/bin/grep \" / \" %1 | cut -f 1 -d \" \"",  UML::homedir + "/mtab");
+	string root_dev = "";
+
+	if (out["exit"]:-1 != 0 )
+	{
+	     root_dev = (string) (out["stdout"]:"");
+	     list<string> root_dev_list = splitstring(root_dev, "\n");
+	     root_dev = root_dev_list[0]:"";
+	}
+
+	y2milestone("UML root device: %1", root_dev);
+	SCR::Write (add (umlpath, "UML_ROOT_DEVICE"), "linux");
+
+	unregister_options_file();
+
+	y2milestone("Starting second installation stage...");
+	SCR::Execute (.target.bash, uml_command);
     }
 
 
