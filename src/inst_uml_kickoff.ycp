@@ -45,7 +45,8 @@
 
 	if (!UML::CreateUser())
 	{
-	    Report::Error (sformat(_("Cannot create UML user %1"), UML::username));
+	    Report::Error (sformat (_("Cannot create UML user %1"),
+				    UML::username));
 	    return false;
 	}
 
@@ -60,7 +61,7 @@
         string scr_file = (string)(SCR::Read (.target.tmpdir)) + "/uml_option.scr";
         SCR::Write (.target.string, scr_file,
 		    sformat ("%1\n\n`ag_ini(`SysConfigFile(\"%2\"))\n", umlpath,
-			     sformat ("%1/OPTIONS", UML::homedir)));
+			     sformat ("/etc/sysconfig/uml/%1.conf", UML::username)));
         SCR::RegisterAgent (umlpath, scr_file);
     }
 
@@ -69,7 +70,17 @@
      *
      */
     define void unregister_options_file () ``{
+
+	SCR::Write (umlpath, nil);
 	SCR::UnregisterAgent (umlpath);
+
+	// The options file must not be owned by the UML user.  Otherwise it
+	// would be possible the change it from the UML instance which would
+	// be a security hole.
+	SCR::Execute (.target.bash, sformat ("/bin/chown root:root /etc/sysconfig/uml/%1.conf",
+					     UML::username));
+	SCR::Execute (.target.bash, sformat ("/bin/chmod 0644 /etc/sysconfig/uml/%1.conf",
+					     UML::username));
     }
 
 
@@ -82,18 +93,13 @@
 	SCR::Write (add (umlpath, "NCPUS"), UML::number_of_cpus);
 
 	SCR::Write (add (umlpath, "USERNAME"), UML::username);
+	SCR::Write (add (umlpath, "HOMEDIR"), UML::homedir);
 
 	SCR::Write (add (umlpath, "TAP_DEVICE"), UML::tap_device);
 	SCR::Write (add (umlpath, "MAC_ADDRESS"), UML::MAC_address);
 
 	SCR::Write (add (umlpath, "EXTRA_ARGS"), "");
 
-	// flush
-	SCR::Write (umlpath, nil);
-	// change owner
-	SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/OPTIONS", UML::username, UML::homedir));
-	// change mode
-	SCR::Execute(.target.bash, sformat("/bin/chmod 0600 %1/OPTIONS", UML::homedir));
     }
 
 
@@ -114,10 +120,12 @@
 	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" +
 		disk_file + " bs=1M " + sformat ("count=%1", s);
 	    SCR::Execute (.target.bash, cmd);
-	    // change owner
-	    SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/%3", UML::username, UML::homedir, disk_file));
-	    // change mode
-	    SCR::Execute(.target.bash, sformat("/bin/chmod 0600 %1/%2", UML::homedir, disk_file));
+
+	    SCR::Execute (.target.bash, sformat ("/bin/chown %1:users %2/%3",
+						 UML::username, UML::homedir,
+						 disk_file));
+	    SCR::Execute (.target.bash, sformat ("/bin/chmod 0600 %1/%2",
+						 UML::homedir, disk_file));
 
 	    i = i + 1;
 
@@ -157,18 +165,22 @@
 
 	SCR::Execute (.target.bash, "/bin/cp " + kernel + " " + UML::homedir +
 		      "/linux");
-	// change owner
-	SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/linux", UML::username, UML::homedir));
-	// change mode
-	SCR::Execute(.target.bash, sformat("/bin/chmod 0700 %1/linux", UML::homedir));
+
+	SCR::Execute (.target.bash, sformat ("/bin/chown %1:users %2/linux",
+					     UML::username, UML::homedir));
+	SCR::Execute (.target.bash, sformat ("/bin/chmod 0700 %1/linux",
+					     UML::homedir));
+
 	SCR::Write (add (umlpath, "KERNEL"), "linux");
 
 	SCR::Execute (.target.bash, "/bin/cp " + initrd + " " + UML::homedir +
 		      "/initrd");
-	// change owner
-	SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/initrd", UML::username, UML::homedir));
-	// change mode
-	SCR::Execute(.target.bash, sformat("/bin/chmod 0600 %1/initrd", UML::homedir));
+
+	SCR::Execute (.target.bash, sformat ("/bin/chown %1:users %2/initrd",
+					     UML::username, UML::homedir));
+	SCR::Execute (.target.bash, sformat ("/bin/chmod 0600 %1/initrd",
+					     UML::homedir));
+
 	SCR::Write (add (umlpath, "INITRD"), "initrd");
 
 	return true;
@@ -185,6 +197,7 @@
 
 	SCR::Execute (.target.bash, "cd " + UML::homedir + " ; " +
 		      Directory::ybindir + "/start-uml " +
+		      "/etc/sysconfig/uml/" + UML::username + ".conf" +
 		      " install=" + url);
 
     }
