@@ -16,7 +16,7 @@ done
 UML_ARGS="$UML_ARGS initrd=./$INITRD"
 UML_ARGS="$UML_ARGS hwprobe=-sys"
 
-UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS"
+UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
 
 if true ; then	# for installation
 
@@ -25,23 +25,81 @@ if true ; then	# for installation
 
     UML_ARGS="$UML_ARGS con=pty ssl=none ssl0=xterm console=ttyS0"
     UML_ARGS="$UML_ARGS con3=xterm"
-
 fi
 
 UML_ARGS="$UML_ARGS $EXTRA_ARGS"
 
 echo $KERNEL $UML_ARGS
 
+
+# create ethernet bridge
+
+ETH_DEVICE=eth0
+BRIDGE_NAME=$ETH_DEVICE
+
+if [ -z "$ETH_DEVICE" ]; then
+    echo "Ethernet device name argument is missing"
+    exit 1;
+fi
+
+# check whether bridge already exists
+brctl show | grep ^$ETH_DEVICE > /dev/null || (
+    NEW_ETH_DEVICE="hw$ETH_DEVICE"
+
+    # stop network device
+    /sbin/rcnetwork stop $ETH_DEVICE
+
+    # change device name
+    ip link set $ETH_DEVICE name $NEW_ETH_DEVICE
+
+    # create bridge
+    brctl addbr $BRIDGE_NAME
+
+    # add ethernet device to bridge
+    brctl addif $BRIDGE_NAME $NEW_ETH_DEVICE
+
+    # set ethernet device up
+    ip link set $NEW_ETH_DEVICE up
+
+    # start network
+    /sbin/rcnetwork start $ETH_DEVICE
+)
+
 # Create TAP device
 /usr/bin/tunctl -t $TAP_DEVICE -u $USERNAME
 
+# add TAP device to the ethernet bridge
+/sbin/brctl addif $BRIDGE_NAME $TAP_DEVICE
+
+# set device up
+/sbin/ip link set $TAP_DEVICE up
+
 # start uml_switch daemon
-/usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null &
+/bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null < /dev/null" $USERNAME &
 
 # enable UML user access to X session
 /usr/X11R6/bin/xauth -f ./.Xauthority merge ~/.Xauthority
-chown $USERNAME:users ./.Xauthority
+chown $USERNAME ./.Xauthority
 
 # start UML machine
 echo "Starting uml..."
 /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
+
+# stop network devices
+
+# read switch PID
+SWITCH_PID=`cat uml_switch.pid`
+rm uml_switch.pid
+
+# stop switch daemon
+kill $SWITCH_PID
+
+# set TAP device down
+/sbin/ip link set $TAP_DEVICE down
+
+# remove TAP device from bridge
+/sbin/brctl delif $BRIDGE_NAME $TAP_DEVICE
+
+# remove TAP device
+/usr/bin/tunctl -d $TAP_DEVICE
+
