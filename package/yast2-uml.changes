@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 11 17:10:32 CET 2004 - arvin@suse.de
+
+- actually start user mode linux
+
+-------------------------------------------------------------------
 Thu Mar 11 12:22:20 CET 2004 - arvin@suse.de
 
 - install required packages

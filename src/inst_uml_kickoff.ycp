@@ -106,8 +106,12 @@
      */
     define void start_uml () ``{
 
+	map general_data = Pkg::SourceGeneralData (UML::source_id);
+	string url = general_data["url"]:"";
+
 	SCR::Execute (.target.bash, "cd " + UML::homedir + " ; " +
-		      Directory::ybindir + "/start-uml");
+		      Directory::ybindir + "/start-uml " +
+		      " install=" + url);
 
     }
 
