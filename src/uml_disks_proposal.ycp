@@ -31,16 +31,16 @@
 
 	if (force_reset)
 	{
-	    UML::disks = [ 1024 ];
+	    UML::disks = [ $[ "size" : 1024, "sparse" : false] ];
 	}
 
 	list<string> tmp = [];
 
 	integer i = 1;
-	foreach (integer s, UML::disks, ``{
+	foreach (map<string,any> m, UML::disks, ``{
 	    // Disk name for uml installation proposal
-	    // %1 is a number, %2 size of disk
-	    tmp = add (tmp, sformat (_("Disk %1: %2 MB"), i, s));
+	    // %1 is a number, %2 size of disk, %3 is "(sparse image)" if it's set
+	    tmp = add (tmp, sformat (_("Disk %1: %2 MB %3"), i, m["size"]:0, (m["sparse"]:false) ? _("(sparse file)") : ""));
 	    i = i + 1;
 	});
 

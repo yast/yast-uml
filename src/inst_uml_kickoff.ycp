@@ -122,14 +122,20 @@
 
 	integer i = 0;
 	boolean ret = true;
-	foreach (integer s, UML::disks, ``{
+	foreach (map<string,any> m, UML::disks, ``{
+
+	    integer s = m["size"]:0;
 
 	    string disk_file = sformat ("ubd%1", i);
 
 	    SCR::Write (add (umlpath, sformat ("DISK%1", i)), disk_file);
 
+	    string dd_options = (m["sparse"]:false) ? (" bs=1 count=1 " + sformat ("seek=%1M",s)) : (" bs=1M " + sformat ("count=%1", s));
+
 	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" +
-		disk_file + " bs=1M " + sformat ("count=%1", s);
+		disk_file + dd_options;
+
+	    y2internal("dd command: %1", cmd);
 	    integer result = (integer) SCR::Execute (.target.bash, cmd);
 
 	    if (result != 0)
@@ -233,7 +239,7 @@
 	    Directory::ybindir + "/start-uml " +
 	    "/etc/sysconfig/uml/" + UML::username + ".conf";
 
-	y2milestone("Starting first installation stage...");
+	y2milestone("Starting first installation stage (%1)...", uml_command + " install=" + url);
 	SCR::Execute (.target.bash, uml_command +
 		      " install=" + url);
 
