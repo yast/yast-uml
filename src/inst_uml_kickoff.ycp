@@ -7,17 +7,50 @@
  *
  * $Id$
  */
-
 {
     import "UML";
     import "Directory";
+    import "Progress";
     import "Report";
     import "Package";
+
 
     textdomain "uml";
 
 
     path umlpath = .uml.options;
+
+
+    /**
+     *
+     */
+    define boolean install_packages () ``{
+
+	if (!Package::InstallAll (["um-host-kernel",
+				   "um-host-install-initrd",
+				   "uml-utilities"]))
+	{
+	    Report::Error (_("Cannot install required packages."));
+	    return false;
+	}
+
+	return true;
+    }
+
+
+    /**
+     *
+     */
+    define boolean create_user () ``{
+
+	if (!UML::CreateUser())
+	{
+	    Report::Error (sformat(_("Cannot create UML user %1"), UML::username));
+	    return false;
+	}
+
+	return true;
+    }
 
 
     /**
@@ -58,7 +91,7 @@
     /**
      *
      */
-    define void make_disks () ``{
+    define boolean make_disks () ``{
 
 	SCR::Write (add (umlpath, "NDISKS"), size (UML::disks));
 
@@ -69,14 +102,15 @@
 
 	    SCR::Write (add (umlpath, sformat ("DISK%1", i)), disk_file);
 
-	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" + disk_file
-	        + " bs=1M " + sformat ("count=%1", s);
+	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" +
+		disk_file + " bs=1M " + sformat ("count=%1", s);
 	    SCR::Execute (.target.bash, cmd);
 
 	    i = i + 1;
 
 	});
 
+	return true;
     }
 
 
@@ -101,7 +135,7 @@
 	string kernel = files_kernel[0]:"";
 	string initrd = files_initrd[0]:"";
 
-	y2milestone ("kernel and initrd %1", kernel, initrd);
+	y2milestone ("kernel and initrd %1 %2", kernel, initrd);
 
 	if (kernel == "" || initrd == "")
 	{
@@ -117,7 +151,6 @@
 	SCR::Write (add (umlpath, "INITRD"), "initrd");
 
 	return true;
-
     };
 
 
@@ -136,32 +169,57 @@
     }
 
 
-    // FIXME, show progress
+    list <string> progress_stages = [
+				     // progress stages
+				     _("Install packages"),
+				     // progress stages
+				     _("Create user"),
+				     // progress stages
+				     _("Save options"),
+				     // progress stages
+				     _("Create virtual disks"),
+				     // progress stages
+				     _("Copy kernel and initrd")
+    ];
+
+    list progress_descriptions = [];
+
+    integer progress_length = 16;
+
+    // Headline for UML Installation
+    string headline = _("Preparing UML Installation");
+
+    // FIXME
+    string help_text = "FIXME.";
 
 
-    if (!Package::InstallAll (["um-host-kernel",
-			       "um-host-install-initrd",
-			       "uml-utilities"]))
-    {
-	Report::Error (_("Cannot install required packages."));
-	return `abort;
-    }
+    // Headline for UML Installation
+    Progress::New (headline, "", progress_length,
+		   progress_stages, progress_descriptions, help_text);
 
+    install_packages ();
 
-    if (!UML::CreateUser())
-    {
-	Report::Error (sformat(_("Cannot create UML user %1"), UML::username));
-	return `abort;
-    }
+    Progress::NextStage ();
 
+    create_user ();
+
+    Progress::NextStage ();
 
     register_options_file ();
 
     save_options ();
+
+    Progress::NextStage ();
+
     make_disks ();
+
+    Progress::NextStage ();
+
     copy_files ();
 
     unregister_options_file ();
+
+    Progress::Finish ();
 
 
     start_uml ();
