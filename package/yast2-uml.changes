@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar 12 12:27:53 CET 2004 - arvin@suse.de
+
+- copy kernel and initrd to home directory
+
+-------------------------------------------------------------------
 Thu Mar 11 17:10:32 CET 2004 - arvin@suse.de
 
 - actually start user mode linux
