@@ -38,6 +38,8 @@
 
     global string eth_device = "eth0";
 
+    global string extra_args = "selinux=0";
+
 
     global define string propose_username() ``{
 

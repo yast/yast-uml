@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan  4 10:50:16 CET 2005 - lslezak@suse.cz
+
+- new widget "Boot Options" (UI for $EXTRA_ARGS in sysconfig)
+- version 2.11.1
+
+-------------------------------------------------------------------
 Tue Jan  4 10:00:51 CET 2005 - lslezak@suse.cz
 
 - command line mode interface
