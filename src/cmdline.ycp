@@ -1,0 +1,137 @@
+/**
+ * File:
+ *   include/uml/cmdline.ycp
+ *
+ * Summary:
+ *   Command line interface functions.
+ *
+ * Authors:
+ *   Ladislav Slezak <lslezak@suse.cz>
+ *
+ * $Id$
+ *
+ * Handlers for command line mode.
+ *
+ */
+
+{
+    import "UML";
+    import "Progress";
+    import "Wizard";
+    import "UsersCache";	// ?? required for initialization of the module
+
+    textdomain "uml";
+
+    define symbol GUIhandler() {
+	// create initial dialog
+	Wizard::CreateDialog ();
+	Wizard::SetDesktopIcon ("uml");
+
+	// calling inst_proposal
+	symbol ret = (symbol) WFM::CallFunction ("inst_proposal", [true, true, `uml]);
+
+	if (ret == `next)
+	{
+	    while (WFM::CallFunction ("inst_uml_kickoff", [false, false]) == `abort)
+	    {
+		// start proposal again if installation was aborted
+		WFM::CallFunction ("inst_proposal", [true, true, `uml]);
+	    }
+	}
+
+	Wizard::CloseDialog ();
+
+	return ret;
+    }
+
+
+    define boolean startHandler(map options) {
+	boolean ret = false;
+
+	// set installation source options
+	if (haskey(options, "install")) {
+	    UML::custom_source = options["install"]:"";
+	    UML::inst_type = `custom;
+	}
+
+	// set user related options
+	if (haskey(options, "user")) {
+	    UML::username = options["user"]:"";
+	    UML::tap_device = options["user"]:"";
+	}
+	if (haskey(options, "home")) {
+	    UML::homedir = options["home"]:"";
+	}
+
+	// set disk image options
+	if (haskey(options, "disk") || haskey(options, "sparse")) {
+	    string diskopt = options["disk"]:"";
+	    string sparseopt = options["sparse"]:"";
+
+	    list<string> disksizes = splitstring(diskopt, ",");
+	    list<string> sparse = splitstring(sparseopt, ",");
+
+	    list <map <string,any> > diskconfig = [];
+
+	    integer disksizes_size = size(disksizes);
+	    integer sparse_size = size(sparse);
+
+	    if (size(disksizes) > 0 || size(sparse) > 0)
+	    {
+		integer index = 0;
+		integer maxindex = (disksizes_size > sparse_size) ? disksizes_size - 1 : sparse_size - 1;
+
+		while (index <= maxindex)
+		{
+		    integer disksizeopt = tointeger(disksizes[index]:"1024");
+		    boolean sparseopt = tointeger(sparse[index]:"0") == 1;
+
+		    diskconfig = add(diskconfig, $["size" : disksizeopt, "sparse" : sparseopt]);
+
+		    index = index + 1;
+		}
+
+		UML::disks = diskconfig;
+	    }
+	}
+
+	// the other options
+	if (haskey(options, "mem")) {
+	    UML::memory_size = tointeger(options["mem"]:"256");
+	}
+	if (haskey(options, "startmode")) {
+	    UML::start_mode = options["startmode"]:"";
+	}
+	if (haskey(options, "MAC")) {
+	    UML::MAC_address = options["MAC"]:"";
+	}
+	if (haskey(options, "netif")) {
+	    UML::eth_device = options["netif"]:"";
+	}
+
+	y2debug("UML::custom_source : %1", UML::custom_source);
+	y2debug("UML::inst_type : %1", UML::inst_type);
+	y2debug("UML::username : %1", UML::username);
+	y2debug("UML::tap_device : %1", UML::tap_device);
+	y2debug("UML::homedir : %1", UML::homedir);
+	y2debug("UML::disks : %1", UML::disks);
+	y2debug("UML::memory_size : %1", UML::memory_size);
+	y2debug("UML::start_mode : %1", UML::start_mode);
+	y2debug("UML::MAC_address : %1", UML::MAC_address);
+	y2debug("UML::eth_device : %1", UML::eth_device);
+
+	// disable progress
+	Progress::off();
+
+	// initialize package manager - otherwise Pkg::PkgGetFilelist returns empty list
+	Pkg::TargetInit ("/", false);
+
+	// start UML installation
+	symbol result = (symbol)WFM::CallFunction("inst_uml_kickoff", [false, false]);
+
+	return result == `next;
+
+	return false;
+    }
+}
+

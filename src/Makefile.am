@@ -20,13 +20,18 @@ client_DATA =				\
 	uml_network_proposal.ycp	\
 	inst_uml_user.ycp
 
-ynclude_DATA =
+ynclude_DATA = cmdline.ycp
 
 desktop_DATA =				\
 	uml.desktop
 
 module_DATA =				\
 	UML.ycp
+
+uml:
+	ln -sf . uml
+
+ycpchook = uml
 
 EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(module_DATA) $(desktop_DATA)
 

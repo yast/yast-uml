@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan  4 10:00:51 CET 2005 - lslezak@suse.cz
+
+- command line mode interface
+
+-------------------------------------------------------------------
 Tue Oct 19 11:22:38 CEST 2004 - lslezak@suse.cz
 
 - get root device name of UML instance - read mtab file (#42859)

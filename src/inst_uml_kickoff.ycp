@@ -135,7 +135,7 @@
 	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" +
 		disk_file + dd_options;
 
-	    y2internal("dd command: %1", cmd);
+	    y2debug("dd command: %1", cmd);
 	    integer result = (integer) SCR::Execute (.target.bash, cmd);
 
 	    if (result != 0)
@@ -167,10 +167,15 @@
      */
     define boolean copy_files () ``{
 
+	y2debug("copy_files() has been started");
+
 	list <string> files_kernel = Pkg::PkgGetFilelist ("um-host-kernel",
 							  `installed);
 	list <string> files_initrd = Pkg::PkgGetFilelist ("um-host-install-initrd",
 							  `installed);
+
+	y2debug("files_kernel: %1", files_kernel);
+	y2debug("files_initrd: %1", files_initrd);
 
 	files_kernel = filter (string s, files_kernel,
 			       ``(substring (s, 0, size ("/usr/bin/linux")) ==
@@ -209,6 +214,11 @@
 					     UML::homedir));
 
 	SCR::Write (add (umlpath, "INITRD"), "initrd");
+
+	// flush changes
+	SCR::Write(umlpath, nil);
+
+	y2debug("copy_files has finished");
 
 	return true;
     };
@@ -411,8 +421,8 @@
 
     if (make_disks() == false)
     {
-	//TODO later: replace reused string with better one
-	Report::Error(_("UML installation failed or was aborted."));
+	// popup error message
+	Report::Error(_("An error occured during creating disk image."));
 	return `abort;
     }
 
