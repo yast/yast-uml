@@ -30,7 +30,7 @@
 	list<string> tmp = [];
 
 	// Proposal for uml installation
-	tmp = add (tmp, sformat (_("Memory size: %1 MB"), UML::memory_size));
+	tmp = add (tmp, sformat (_("Memory Size: %1 MB"), UML::memory_size));
 
 	// Proposal for uml installation
 // UML currently doesn't support SMP

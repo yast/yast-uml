@@ -26,7 +26,7 @@
 			      `VSpacing(0.5),
 			      `ComboBox(`id(`size), `opt(`editable),
 					// combobox label
-					_("Disk size in MB:"),
+					_("Disk Size in MB:"),
 					["512", "1024", "2048", "4096"]),
 			      `VSpacing(0.5),
 			      `HBox(
@@ -68,9 +68,10 @@
 			  );
 
     // help text for UML disk setup
-    string help_text = _("<P><B>Virtual disk setup<B></P>")
-    + _("<P>Here you can configure number and size of virtual disks.
-Content of each virtual disk is stored in file in the host system.</P>");
+    string help_text = _("<P><B>Virtual Disk Setup<B></P>")
+    + _("<P>Here, configure number and size of virtual disks.
+The content of each virtual disk is stored in a file in the host system.</P>
+");
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));

@@ -11,6 +11,9 @@
     import "UML";
     import "HTML";
 
+    import "Report";
+    Report::DisplayErrors(true, 0);
+
     string func = (string) WFM::Args (0);
     map param = (map) WFM::Args (1);
     map ret = $[];

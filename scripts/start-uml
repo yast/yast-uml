@@ -8,42 +8,41 @@ shift
 echo $* | grep "install=" > /dev/null
 UML_RUN_MODE=$?
 
-
+# set general options
 UML_ARGS="umid=${USERNAME}"
-
 UML_ARGS="$UML_ARGS mem=${MEMORY}m ncups=${NCPUS}"
 
+# virtual disks
 for i in `seq 0 $(($NDISKS - 1))` ; do
     eval d=\$DISK$i
     UML_ARGS="$UML_ARGS ubd$i=$d"
 done
 
 UML_ARGS="$UML_ARGS initrd=./$INITRD"
-UML_ARGS="$UML_ARGS hwprobe=-sys"
-
 UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
-
 UML_ARGS="$UML_ARGS ssl=none"
+UML_ARGS="$UML_ARGS con=pts"
+SU=/bin/su
 
-if [ -n "$UML_ROOT_DEVICE" ]; then
-    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE"
-fi
 
-if [ $UML_RUN_MODE == 0 ]; then	# for installation
-
+if [ $UML_RUN_MODE == 0 ]; then
+    # set installation options
     UML_ARGS="$UML_ARGS ramdisk_size=65536"
     UML_ARGS="$UML_ARGS textmode=1"
-    UML_ARGS="$UML_ARGS con=pty con0=xterm con2=xterm con3=xterm con4=xterm"
-#else
-    # runtime mode
-#    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE ssl=none"
+    UML_ARGS="$UML_ARGS ssl0=xterm"
+    UML_ARGS="$UML_ARGS console=ttyS0"
+    UML_ARGS="$UML_ARGS term=xterm"
+    # disable all terminals except tty2 (debug shell)
+    UML_ARGS="$UML_ARGS con=none con2=pts"
+    SU=/usr/X11R6/bin/sux
 fi
+
 
 UML_ARGS="$UML_ARGS $EXTRA_ARGS"
 
 echo $KERNEL $UML_ARGS
 
-
+# network setup
 # create ethernet bridge
 
 BRIDGE_NAME=$ETH_DEVICE
@@ -76,7 +75,7 @@ brctl show | grep ^$ETH_DEVICE > /dev/null || (
     /sbin/rcnetwork start $ETH_DEVICE
 )
 
-# Create TAP device
+# create TAP device
 /usr/bin/tunctl -t $TAP_DEVICE -u $USERNAME
 
 # add TAP device to the ethernet bridge
@@ -88,15 +87,14 @@ brctl show | grep ^$ETH_DEVICE > /dev/null || (
 # start uml_switch daemon
 /bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null < /dev/null" $USERNAME &
 
-if [ $UML_RUN_MODE == "0" ]; then
-    # enable UML user access to X session at installation
-    /usr/X11R6/bin/xauth -f ./.Xauthority merge ~/.Xauthority
-    chown $USERNAME ./.Xauthority
-fi
-
 # start UML machine
 echo "Starting uml..."
-/bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
+$SU -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
+
+# disable X access
+if [ -e ./.Xauthority ]; then
+    rm ./.Xauthority
+fi
 
 # stop network devices
 

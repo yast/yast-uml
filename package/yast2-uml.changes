@@ -1,4 +1,76 @@
 -------------------------------------------------------------------
+Thu Jun 10 09:24:07 CEST 2004 - lslezak@suse.cz
+
+- removed unnecessary Users:: imports, reenabled error popups
+  (disabled by Users:: module) (#41703)
+- version 2.9.20
+
+-------------------------------------------------------------------
+Fri May 28 08:10:57 CEST 2004 - lslezak@suse.cz
+
+- fixed linuxrc hang - disable all UML terminals except tty2
+  during installation (#40877)
+- version 2.9.19
+
+-------------------------------------------------------------------
+Tue May 25 14:11:15 CEST 2004 - arvin@suse.de
+
+- dropped obsolete workaround "hwprobe=-sys" (bug #35761)
+
+-------------------------------------------------------------------
+Thu May 20 07:58:42 CEST 2004 - lslezak@suse.cz
+
+- activate uml service if start mode is "onboot" (#40781)
+- fixed memory size list - installation requires at least 256MB
+  (see #38826) and UML doesn't support more than ~470MB
+- version 2.9.17
+
+-------------------------------------------------------------------
+Fri May 14 15:37:19 CEST 2004 - arvin@suse.de
+
+- fixed init script for the case that there are no config files
+  (bug #40590)
+
+-------------------------------------------------------------------
+Thu May 13 17:30:05 CEST 2004 - lslezak@suse.cz
+
+- disable selinux (#39811)
+- start installation on the serial line, set TERM=xterm
+  (otherwise ncurses UI in yast is broken) (#39947)
+- remove incomplete disk image file
+- version 2.9.15
+
+-------------------------------------------------------------------
+Tue May 04 11:17:06 CEST 2004 - arvin@suse.de
+
+- merged proofread messages
+
+-------------------------------------------------------------------
+Fri Apr 30 10:15:33 CEST 2004 - lslezak@suse.cz
+
+- check whether installation is started in UML
+  (nested installation doesn't work)
+- version 2.9.13
+
+-------------------------------------------------------------------
+Fri Apr 30 10:36:16 CEST 2004 - arvin@suse.de
+
+- adapted to api changes in yast2-users
+
+-------------------------------------------------------------------
+Thu Apr 29 15:06:50 CEST 2004 - lslezak@suse.cz
+
+- check whether X application can be started
+- start-uml - use only one xterm for installation (other terminals
+  are redirected to /dev/pts/)
+- progress bar - fixed current stage
+- new uml initscript
+- spec file - uninstall scripts (stop and disable uml service)
+- use sux for UML start (#37153)
+- use hostname in MAC address proposal
+- version 2.9.11
+
+-------------------------------------------------------------------
 Fri Apr 16 15:37:10 CEST 2004 - lslezak@suse.cz
 
 - added help texts

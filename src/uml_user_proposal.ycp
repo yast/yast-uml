@@ -11,7 +11,6 @@
 
     import "UML";
     import "HTML";
-    import "Users";
 
     string func = (string) WFM::Args (0);
     map param = (map) WFM::Args (1);

@@ -48,8 +48,8 @@
     );
 
     // help text for uml user settings
-    string help_text = _("<p><b>Network Settings</b></p><br><p>Here you can set TAP device name which is used for communication with virtual machine.</p>")
-	+ _("<p>Each virtual machine have virtual ethernet network card. MAC address is unique identification of ethernet network card.</p>")
+    string help_text = _("<p><b>Network Settings</b></p><br><p>Here, set the TAP device name used for communication with the virtual machine.</p>")
+	+ _("<p>Each virtual machine has a virtual ethernet network card. The MAC address is a unique identification of the ethernet network card.</p>")
     ;
 
     Wizard::SetContents (title, contents, help_text, true, true);
@@ -75,7 +75,7 @@
 	    if (!Check_MAC(MAC_address))
 	    {
 		// error message
-                Report::Error(_("Entered MAC address is not valid."));
+                Report::Error(_("The MAC address entered is not valid."));
                 UI::SetFocus(`id(`MAC_address));
 		ret = `again;
 	    }

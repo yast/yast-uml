@@ -83,7 +83,7 @@
 	    grp["cn"] = "tun";
 	    grp["type"] = "local";
 
-	    ret = Users::AddGroup(grp);
+	    ret = Users::AddGroup(grp) == "";
 	    y2debug("Users::AddGroup: %1", ret);
 
 	    if (ret == true)
@@ -129,7 +129,7 @@
 
 	Users::ResetCurrentUser ();
 
-	if (Users::AddUser(user) == true)
+	if (Users::AddUser(user) == "")
 	{
 	    Users::CommitUser();
 
@@ -139,7 +139,7 @@
 	}
 	else
 	{
-	    Report::Error (sformat(_("Cannot create account for user %1"),
+	    Report::Error (sformat(_("Cannot create account for user %1."),
 				   username));
 	}
 
@@ -158,7 +158,11 @@
     }
 
     global string propose_MAC_address() ``{
-	string command = sformat("echo %1 | md5sum", UML::homedir + "/ubd0");
+	// use hostname and disk image file name for MAC address proposal
+	// each UML machine on network should have different MAC address
+	map<string,any> h_out = (map<string,any>)SCR::Execute(.target.bash_output, "/bin/hostname");
+	string host_n = mergestring(splitstring(h_out["stdout"]:"", "\n"), "");
+	string command = sformat("echo %1 | md5sum", UML::homedir + "/ubd0" + host_n);
 	map<string,any> out = (map<string,any>)SCR::Execute(.target.bash_output, command);
 	list<string> result= splitstring(out["stdout"]:"", "\n");
 
