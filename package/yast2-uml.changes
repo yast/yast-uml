@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 27 15:37:23 CEST 2004 - lslezak@suse.cz
+
+- set LD_ASSUME_KERNEL="2.4.21" in UML start script (#45149)
+- version 2.10.2
+
+-------------------------------------------------------------------
 Thu Sep  2 15:32:02 CEST 2004 - lslezak@suse.cz
 
 - workaround for starting second installation stage (#42859)
