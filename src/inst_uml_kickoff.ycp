@@ -57,6 +57,67 @@
 	return true;
     }
 
+    define boolean setXaccess(string user, boolean enable) {
+	map echo = (map) SCR::Execute(.target.bash_output, "echo -n $HOME");
+	string home = echo["stdout"]:"";
+
+	// check whether .xauth dir exists
+	if (SCR::Read(.target.size, home + "/.xauth") < 0)
+	{
+	    y2milestone(".xauth doesn't exist");
+
+	    // the directory doesn't exist, nothing to disable
+	    if (enable == false)
+	    {
+		return true;
+	    }
+
+	    SCR::Execute(.target.mkdir, home + "/.xauth");
+	}
+
+	string xexport = (string) SCR::Read(.target.string, home + "/.xauth/export");
+	list<string> exports = [];
+
+	if (xexport != nil)
+	{
+	    exports = splitstring(xexport, "\n");
+	}
+
+	// filter out empty lines
+//	exports = filter(string e, exports, {return e != "";});
+
+	boolean changed = false;
+
+	if (enable == true)
+	{
+	    if (!contains(exports, user))
+	    {
+		exports = add(exports, user);
+		changed = true;
+	    }
+	}
+	else if (enable == false)
+	{
+	    if (contains(exports, UML::username))
+	    {
+		exports = filter(string e, exports, {
+			return e != user;
+		    }
+		);
+
+		changed = true;
+	    }
+	}
+
+	// write changes
+	if (changed == true && exports != nil)
+	{
+	    y2milestone("changed exports to: %1", exports);
+	    return (boolean) SCR::Write(.target.string, home + "/.xauth/export", mergestring(exports, "\n"));
+	}
+
+	return true;
+    }
 
     /**
      *
@@ -184,8 +245,48 @@
 			       ``(substring (s, 0, size ("/usr/lib/initrd")) ==
 				  "/usr/lib/initrd"));
 
-	string kernel = files_kernel[0]:"";
-	string initrd = files_initrd[0]:"";
+	if (size(files_kernel) == 0)
+	{
+	    map out = (map) SCR::Execute(.target.bash_output, "/bin/ls /usr/bin/linux*");
+	    files_kernel = splitstring(out["stdout"]:"", "\n");
+	}
+
+	if (size(files_initrd) == 0)
+	{
+	    map out = (map) SCR::Execute(.target.bash_output, "/bin/ls /usr/lib/initrd*");
+	    files_initrd = splitstring(out["stdout"]:"", "\n");
+	}
+
+	y2debug("files_kernel: %1", files_kernel);
+	y2debug("files_initrd: %1", files_initrd);
+
+	// use the longest filename (ignore symlinks, they are shorter - don't contain version string)
+	integer maxsize = 0;
+	string kernel = "";
+	foreach(string k, files_kernel, {
+		integer ksize = size(k);
+
+		if (ksize > maxsize)
+		{
+		    kernel = k;
+		    maxsize = ksize;
+		}
+	    }
+	);
+
+	maxsize = 0;
+	string initrd = "";
+	foreach(string i, files_initrd, {
+		integer isize = size(i);
+
+		if (isize > maxsize)
+		{
+		    initrd = i;
+		    maxsize = isize;
+		}
+	    }
+	);
+
 
 	y2milestone ("kernel and initrd %1 %2", kernel, initrd);
 
@@ -431,6 +532,9 @@
 
     unregister_options_file ();
 
+    // enable X access
+    setXaccess(UML::username, true);
+
     Progress::NextStage ();
 
     string uml_command = "cd " + UML::homedir + " ; " +
@@ -442,6 +546,9 @@
     Progress::NextStage ();
 
     start_uml_2ndstage(uml_command);
+
+    // disable X access - restore previous state
+    setXaccess(UML::username, true);
 
     Progress::Finish ();
 
