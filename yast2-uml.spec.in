@@ -5,8 +5,6 @@
 @HEADER@
 Requires:	yast2 yast2-installation yast2-users
 
-BuildArchitectures:	noarch
-
 Summary:	Configuration of UML
 
 %description

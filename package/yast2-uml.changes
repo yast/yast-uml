@@ -4,6 +4,11 @@ Fri Apr 02 15:59:59 CEST 2004 - arvin@suse.de
 - finally changed license to GPL for good
 
 -------------------------------------------------------------------
+Wed Mar 31 22:32:16 CEST 2004 - ro@suse.de
+
+- remove noarch since we only want this on i386 and x86_64
+
+-------------------------------------------------------------------
 Wed Mar 31 18:47:44 CEST 2004 - lslezak@suse.cz
 
 - version 2.9.8
