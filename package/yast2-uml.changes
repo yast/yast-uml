@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 12 16:07:54 CEST 2004 - lslezak@suse.cz
+
+- sparse disk image option (#40646)
+
+-------------------------------------------------------------------
 Tue Jun 22 16:13:18 CEST 2004 - lslezak@suse.cz
 
 - improved installation selection dialog: support even not

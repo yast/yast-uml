@@ -1,5 +1,5 @@
 /**
- * Module: 	inst_uml_disks.ycp
+ * Module:	inst_uml_disks.ycp
  *
  * Authors:	Arvin Schnell <arvin@suse.de>
  *
@@ -20,8 +20,10 @@
     // screen title for uml disks
     string title = _("Virtual Disks");
 
+    list<map<string,any> > disks = UML::disks;
 
-    define integer ask_size (integer s) ``{
+
+    define map<string,any> ask_size (integer s, boolean sparse) ``{
 
 	UI::OpenDialog (`opt(`decorated),
 			// heading in a popup dialog
@@ -31,7 +33,9 @@
 					// combobox label
 					_("&Disk Size in MB:"),
 					["512", "1024", "2048", "4096"]),
-			      `VSpacing(0.5),
+			      `VSpacing(0.8),
+			      `CheckBox(`id(`sparse), _("Create &Sparse Image File"), sparse),
+			      `VSpacing(1),
 			      `HBox(
 				    `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
 				    `PushButton(`id(`cancel), Label::CancelButton())
@@ -47,11 +51,25 @@
 	else
 	    s = -1;
 
+	boolean sparse_file = (boolean) UI::QueryWidget (`id(`sparse), `Value);
+
 	UI::CloseDialog ();
 
-	return s;
+	y2internal("ret: %1", $[ "size" : s, "sparse" : sparse_file ]);
+
+	return $[ "size" : s, "sparse" : sparse_file ];
     }
 
+    define void refresh_table(list<map<string,any> > disks)
+    {
+	integer id_cnt = 0;
+	list <term> d = [];
+	foreach (map<string,any> m, disks, ``{
+	    d = add(d, `item (`id(id_cnt), m["size"]:0, (m["sparse"]:false) ? UI::Glyph(`CheckMark) : ""));
+	    id_cnt = id_cnt + 1;
+	});
+	UI::ChangeWidget (`id(`disks), `Items, d);
+    }
 
     // build and show dialog
 
@@ -60,8 +78,8 @@
     term contents = `VBox(
 			  `VBox(
 				`Left(`Table(`id(`disks),
-					     // column heading
-					     `header (_("Size")), []))
+					     // table - column heading
+					     `header (`Right(_("Disk Size (MB)")), `Center(_("Sparse File"))), []))
 				),
 			  `HBox(
 				`PushButton (`id (`add), Label::AddButton()),
@@ -76,17 +94,12 @@
 The content of each virtual disk is stored in a file in the host system.</P>
 ");
 
+    // TODO: add sparse option help text
+
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));
 
-    integer id_cnt = 0;
-
-    list <term> disks = [];
-    foreach (integer s, UML::disks, ``{
-	disks = add (disks, `item (`id (sformat ("d%1", id_cnt)), s));
-	id_cnt = id_cnt + 1;
-    });
-    UI::ChangeWidget (`id(`disks), `Items, disks);
+    refresh_table(disks);
 
     symbol ret = nil;
 
@@ -102,53 +115,52 @@ The content of each virtual disk is stored in a file in the host system.</P>
 
 	if (ret == `add)
 	{
-	    integer s = ask_size (1024);
+	    map<string,any> m = ask_size (1024, false);
+
+	    integer s = m["size"]:-1;
 	    if (s >= 0)
 	    {
-		disks = add (disks, `item (`id (sformat ("d%1", id_cnt)), s));
-		UI::ChangeWidget (`id(`disks), `Items, disks);
-		UI::ChangeWidget (`id(`disks), `CurrentItem, sformat ("d%1", id_cnt));
-		id_cnt = id_cnt + 1;
+		disks = add(disks, m);
+		refresh_table(disks);
 	    }
 	}
 
 	if (ret == `edit)
 	{
-	    string id = (string) UI::QueryWidget (`id(`disks), `CurrentItem);
+	    integer id = (integer) UI::QueryWidget (`id(`disks), `CurrentItem);
 	    if (id != nil)
 	    {
-		integer i = -1;
-		integer l = 0;
-		foreach (term t, disks, ``{
-		    if (t[0,0]:"" == id)
-			i = l;
-		    l = l + 1;
-		});
+		map<string,any> d = disks[id]:$[];
+		d = ask_size(d["size"]:0, d["sparse"]:false);
 
-		if (i != -1)
+		if (d["size"]:0 > 0)
 		{
-		    term t = disks[i]:`Empty();
-		    integer s = t[1]:0;
+		    disks[id] = d;
 
-		    s = ask_size (s);
-		    if (s >= 0)
-		    {
-			t[1] = s;
-			disks[i] = t;
-			UI::ChangeWidget (`id(`disks), `Items, disks);
-			UI::ChangeWidget (`id(`disks), `CurrentItem, id);
-		    }
+		    refresh_table(disks);
 		}
 	    }
 	}
 
 	if (ret == `delete)
 	{
-	    string id = (string) UI::QueryWidget (`id(`disks), `CurrentItem);
+	    integer id = (integer) UI::QueryWidget (`id(`disks), `CurrentItem);
+
 	    if (id != nil)
 	    {
-		disks = filter (term t, disks, ``(t[0]:`Empty() != `id(id)));
-		UI::ChangeWidget (`id(`disks), `Items, disks);
+		list<map<string,any> > new_disks = [];
+
+		foreach(map<string,any> m, disks, ``{
+			if (id != 0)
+			{
+			    new_disks = add(new_disks, m);
+			}
+			id = id - 1;
+		    }
+		);
+
+		disks = new_disks;
+		refresh_table(disks);
 	    }
 	}
 
@@ -162,11 +174,7 @@ The content of each virtual disk is stored in a file in the host system.</P>
 		continue;
 	    }
 
-	    UML::disks = [];
-	    foreach (term t, disks, ``{
-		UML::disks = add (UML::disks, t[1]:0);
-	    });
-
+	    UML::disks = disks;
 	    break;
 	}
     }
