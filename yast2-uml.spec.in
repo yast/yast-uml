@@ -35,6 +35,8 @@ ln -sf ../etc/init.d/uml $RPM_BUILD_ROOT/sbin/rcuml
 @moduledir@/UML.*
 @desktopdir@/uml.desktop
 @ybindir@/start-uml
+%dir @yncludedir@/uml
+@yncludedir@/uml/*
 %doc @docdir@
 /etc/init.d/uml
 /sbin/rcuml
