@@ -175,7 +175,19 @@
 
     global void propose_selection () ``{
 	list <integer> sources = Pkg::SourceGetCurrent (false);
-	source_id = sources[0]:0;
+
+	foreach(integer src, sources, ``{
+		map general_data = Pkg::SourceGeneralData(src);
+		string srcurl = general_data["url"]:"";
+
+		// use only network sources in proposal
+		if (regexpmatch(srcurl, "^(ftp)|(nfs)|(smb)|(http)://"))
+		{
+		    y2milestone("Found network source: %1", src);
+		    source_id = src;
+		}
+	    }
+	);
     }
 
 

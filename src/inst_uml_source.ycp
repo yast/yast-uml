@@ -12,6 +12,7 @@
     import "Label";
     import "Popup";
     import "Wizard";
+    import "Report";
 
 
     // screen title for uml source
@@ -61,12 +62,17 @@
 					     // column heading
 					     `header(_("Name"), _("URL")),
 					     [ ]))
-				)
+				),
+				// push button label
+				// installation source configuration module
+				// is started when it's pressed
+				`PushButton(`id(`inst_src), _("Configure..."))
 			  );
 
     // help text for backup dialog during update 1/7
-    string help_text = _("<p>FIXME</p>
-");
+    string help_text = _("<P><B>Installation source</B></P>")
+    + _("<P>Select installation source from which will be UML machine installed.</P>")
+    + _("<P>Only network installation sources are supported (e.g. FTP, NFS,...) in UML installation.</P>");
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));
@@ -89,8 +95,32 @@
 	{
 	    integer current = (integer) UI::QueryWidget (`id(`sources),
 							 `CurrentItem);
-            UML::source_id = sources[current]:0;
-	    break;
+
+	    integer current_srcid = sources[current]:0;
+
+	    map general_data = Pkg::SourceGeneralData(current_srcid);
+	    string srcurl = general_data["url"]:"";
+
+	    if (regexpmatch(srcurl, "^(ftp)|(nfs)|(smb)|(http)://"))
+	    {
+		y2debug("Selected network source: %1", srcurl);
+		UML::source_id = current_srcid;
+		break;
+	    }
+	    else
+	    {
+		Report::Error(_("Only network installation sources
+are supported in UML installation."));
+	    }
+	}
+
+	if (ret == `inst_src)
+	{
+	    // start installation source configuration module
+	    WFM::CallFunction("inst_source", []);
+	    // refresh table content
+	    sources = Pkg::SourceGetCurrent(false);
+	    fill_table();
 	}
     }
 
