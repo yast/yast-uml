@@ -22,6 +22,11 @@ UML_ARGS="$UML_ARGS initrd=./$INITRD"
 UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
 UML_ARGS="$UML_ARGS ssl=none"
 UML_ARGS="$UML_ARGS con=pts"
+
+if [ -n "$ROOT_DEVICE" ]; then
+    UML_ARGS="$UML_ARGS root=$ROOT_DEVICE"
+fi
+
 SU=/bin/su
 
 

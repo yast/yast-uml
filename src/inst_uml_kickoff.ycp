@@ -213,6 +213,47 @@
 	return true;
     };
 
+    /**
+     * Parse uml_mconsole /proc/mounts output, return device which is mounted to /mnt directory
+     * @param stdout output from uml_mconsole
+     * @return string device name or empty string when /mnt entry was not found
+     */
+    define string FindRootDevice(string stdout)
+    {
+	string ret = "";
+
+	// remove "OK " message from the beginning if it's present
+	if (substring(stdout, 0, 3) == "OK ")
+	{
+	    stdout = substring(stdout, 3);
+	}
+
+	list<string> mounts = splitstring(stdout, "\n");
+
+	foreach(string mount, mounts, ``{
+		// get device name and mount point
+		list<string> parts = splitstring(mount, " ");
+
+		if (parts[1]:"" == "/mnt")
+		{
+		    ret = parts[0]:"";
+		}
+	    }
+	);
+
+	return ret;
+    }
+
+    /**
+     * Write ROOT_DEVICE variable into sysconfig file
+     * @param root_device ROOT_DEVICE value
+     */
+    define void WriteRootDevice(string root_device)
+    {
+	register_options_file();
+	SCR::Write(add(umlpath, "ROOT_DEVICE"), root_device);
+	unregister_options_file();
+    }
 
     /**
      *
@@ -240,8 +281,49 @@
 	    "/etc/sysconfig/uml/" + UML::username + ".conf";
 
 	y2milestone("Starting first installation stage (%1)...", uml_command + " install=" + url);
-	SCR::Execute (.target.bash, uml_command +
+
+	// use background agent, don't store output from subprocess
+	SCR::Execute (.background.run, uml_command +
 		      " install=" + url);
+
+	integer query = 0;
+	string root_device = "";
+	integer counter = 0;
+
+	while((boolean)SCR::Read(.background.output_open))
+	{
+	    sleep(1000);     // wait 1 second
+
+	    // check mounted devices every 15 seconds
+	    if (counter == 15)
+	    {
+		query = query + 1;
+
+		y2debug("Query: %1", query);
+		// use mconsole to get content of /proc/mounts file
+		string cmd = "/usr/bin/uml_mconsole " + UML::homedir + "/.uml/" + UML::username + "/mconsole proc mounts 2> /dev/null";
+		map out = (map)SCR::Execute(.target.bash_output, cmd);
+		string stdout = (string) out["stdout"]:"";
+
+		// search for /mnt mount point
+		string root = FindRootDevice(stdout);
+
+		if (root != "" && root_device != root)
+		{
+		    root_device = root;
+		    y2milestone("Detected root device: %1", root_device);
+		}
+
+		counter = 0;
+	    }
+	    else
+	    {
+		counter = counter + 1;
+	    }
+	}
+
+	// write detected root device to sysconfig file
+	WriteRootDevice(root_device);
 
 	string file_name = UML::homedir + "/initrd.inst";
 
