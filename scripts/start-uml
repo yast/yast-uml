@@ -92,6 +92,7 @@ brctl show | grep ^$ETH_DEVICE > /dev/null || (
 /sbin/ip link set $TAP_DEVICE up
 
 # start uml_switch daemon
+#/bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > switch.out 2> switch.err < /dev/null" $USERNAME &
 /bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null < /dev/null" $USERNAME &
 
 # start UML machine

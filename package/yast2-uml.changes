@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Oct 19 11:22:38 CEST 2004 - lslezak@suse.cz
+
+- get root device name of UML instance - read mtab file (#42859)
+- added second UML installation stage to progress
+- version 2.11.0
+
+-------------------------------------------------------------------
 Mon Oct 11 16:45:55 CEST 2004 - jsrain@suse.cz
 
 - adapted to new Arch:: interface
