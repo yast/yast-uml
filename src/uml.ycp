@@ -27,7 +27,7 @@
     Wizard::CreateDialog ();
     Wizard::SetDesktopIcon ("uml");
 
-    if (Arch::is_uml == true)
+    if (Arch::is_uml () == true)
     {
 	// we are already in UML, for nested UML we would need
 	// nested UML kernel (CONFIG_NEST_LEVEL=1) which is not present
