@@ -1,9 +1,12 @@
 /**
- * Module:	proposal_uml_disks.ycp
+ * Module:	uml_disks_proposal.ycp
  *
  * Author:	Arvin Schnell <arvin@suse.de>
  *
  * Purpose:     Proposal for uml disks
+ *
+ * $Id$
+ *
  */
 {
     textdomain "uml";

@@ -4,6 +4,9 @@
  * Authors:	Ladislav Slezak <lslezak@suse.cz>
  *
  * Purpose:	Ask the user for network settings.
+ *
+ * $Id$
+ *
  */
 
 {
@@ -31,7 +34,7 @@
 
 	    `Left(`TextEntry(`id(`tap_device),
 		    // text entry label
-		    _("Device Name"),
+		    _("&Device Name"),
 		    UML::tap_device
 		)
 	    ),
@@ -40,15 +43,18 @@
 
 	    `Left(`TextEntry(`id(`MAC_address),
 		    // text entry label
-		    _("MAC Address"),
+		    _("&MAC Address"),
 		    UML::MAC_address
 		)
 	    )
 	)
     );
 
-    // help text for uml user settings
-    string help_text = _("<p><b>Network Settings</b></p><br><p>Here, set the TAP device name used for communication with the virtual machine.</p>")
+    // help text for uml user settings (1/3)
+    string help_text = _("<p><b>Network Settings</b><br></p>")
+	// help text for uml user settings (2/3)
+	+ _("<p>Here, set the TAP device name used for communication with the virtual machine.</p>")
+	// help text for uml user settings (3/3)
 	+ _("<p>Each virtual machine has a virtual ethernet network card. The MAC address is a unique identification of the ethernet network card.</p>")
     ;
 

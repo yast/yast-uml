@@ -4,6 +4,9 @@
  * Authors:	Arvin Schnell <arvin@suse.de>
  *
  * Purpose:	Ask the user for various options for uml.
+ *
+ * $Id$
+ *
  */
 
 {
@@ -24,7 +27,7 @@
 			      `VBox(
 				    `Left(`ComboBox(`id(`memory), `opt(`editable),
 						    // combobox label
-						    _("Memory Size in MB:"),
+						    _("&Memory Size in MB:"),
 						    ["256", "512"])),
 // UML currently doesn't support SMP
 //
@@ -34,7 +37,7 @@
 //						    ["1", "2", "4"])),
 				    `Left(`ComboBox(`id(`startmode),
 						    // combobox label
-						    _("Activation"),
+						    _("A&ctivation"),
 						    [
 						     // combobox item
 						     `item(`id("manual"), _("Manually")),
@@ -61,7 +64,7 @@ start mode <I>on boot</I> for automatic start.</P>
     UI::ChangeWidget (`id(`memory), `ValidChars, "0123456789");
     UI::ChangeWidget (`id(`memory), `Value, tostring (UML::memory_size));
 
-    UI::ChangeWidget (`id(`ncpus), `ValidChars, "0123456789");
+//    UI::ChangeWidget (`id(`ncpus), `ValidChars, "0123456789");
 //    UI::ChangeWidget (`id(`ncpus), `Value, tostring (UML::number_of_cpus));
 
     UI::ChangeWidget (`id(`startmode), `Value, UML::start_mode);

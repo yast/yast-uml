@@ -1,9 +1,12 @@
 /**
- * Module:	proposal_uml_options.ycp
+ * Module:	uml_options_proposal.ycp
  *
  * Author:	Arvin Schnell <arvin@suse.de>
  *
  * Purpose:     Proposal for uml options
+ *
+ * $Id$
+ *
  */
 {
     textdomain "uml";

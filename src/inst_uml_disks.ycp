@@ -4,6 +4,9 @@
  * Authors:	Arvin Schnell <arvin@suse.de>
  *
  * Purpose:	Ask the user for virtual disks for uml.
+ *
+ * $Id$
+ *
  */
 {
     textdomain "uml";
@@ -26,7 +29,7 @@
 			      `VSpacing(0.5),
 			      `ComboBox(`id(`size), `opt(`editable),
 					// combobox label
-					_("Disk Size in MB:"),
+					_("&Disk Size in MB:"),
 					["512", "1024", "2048", "4096"]),
 			      `VSpacing(0.5),
 			      `HBox(
