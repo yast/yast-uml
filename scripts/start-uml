@@ -12,16 +12,20 @@ for i in `seq 0 $(($NDISKS - 1))` ; do
 done
 
 UML_ARGS="$UML_ARGS initrd=./$INITRD"
-
-UML_ARGS="$UML_ARGS con=pty ssl=none ssl0=xterm console=ttyS0"
-
-UML_ARGS="$UML_ARGS con3=xterm"
-
 UML_ARGS="$UML_ARGS hwprobe=-sys"
+
+if true ; then	# for installation
+
+    UML_ARGS="$UML_ARGS ramdisk_size=65536"
+    UML_ARGS="$UML_ARGS rootfstype=minix"
+
+    UML_ARGS="$UML_ARGS con=pty ssl=none ssl0=xterm console=ttyS0"
+    UML_ARGS="$UML_ARGS con3=xterm"
+
+fi
 
 UML_ARGS="$UML_ARGS $EXTRA_ARGS"
 
 echo $KERNEL $UML_ARGS
 
 ./$KERNEL $UML_ARGS $*
-
