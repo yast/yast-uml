@@ -73,7 +73,7 @@
 	string error = Users::CheckGroupname("tun");
 	boolean ret = false;
 
-	y2internal("error: '%1'", error);
+	y2debug("check group name: '%1'", error);
 	if (error == "")
 	{
 	    Users::ResetCurrentGroup();
@@ -84,7 +84,7 @@
 	    grp["type"] = "local";
 
 	    ret = Users::AddGroup(grp);
-	    y2internal("ret: %1", ret);
+	    y2debug("Users::AddGroup: %1", ret);
 
 	    if (ret == true)
 	    {
