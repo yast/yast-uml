@@ -1,8 +1,9 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages yast2-perl-bindings perl-Digest-SHA1 perl-gettext yast2-users
+
+# neededforbuild  yast2-devel-packages yast2-perl-bindings perl-Digest-SHA1 perl-gettext yast2-users
 
 @HEADER@
-Requires:	yast2
+Requires:	yast2 yast2-installation yast2-users
 
 BuildArchitectures:	noarch
 
