@@ -60,8 +60,6 @@
      */
     define void make_disks () ``{
 
-	// FIXME progress bars
-
 	SCR::Write (add (umlpath, "NDISKS"), size (UML::disks));
 
 	integer i = 0;
@@ -85,10 +83,30 @@
     /**
      *
      */
-    define void copy_files () ``{
+    define boolean copy_files () ``{
 
-	string kernel = "/usr/bin/linux-2.6.3-27-um"; // FIXME
-	string initrd = "/usr/lib/initrd"; // FIXME
+	list <string> files_kernel = Pkg::PkgGetFilelist ("um-host-kernel",
+							  `installed);
+	list <string> files_initrd = Pkg::PkgGetFilelist ("um-host-install-initrd",
+							  `installed);
+
+	files_kernel = filter (string s, files_kernel,
+			       ``(substring (s, 0, size ("/usr/bin/linux")) ==
+				  "/usr/bin/linux"));
+
+	files_initrd = filter (string s, files_initrd,
+			       ``(substring (s, 0, size ("/usr/lib/initrd")) ==
+				  "/usr/lib/initrd"));
+
+	string kernel = files_kernel[0]:"";
+	string initrd = files_initrd[0]:"";
+
+	y2milestone ("kernel and initrd %1", kernel, initrd);
+
+	if (kernel == "" || initrd == "")
+	{
+	    return false;
+	}
 
 	SCR::Execute (.target.bash, "/bin/cp " + kernel + " " + UML::homedir +
 		      "/linux");
@@ -97,6 +115,8 @@
 	SCR::Execute (.target.bash, "/bin/cp " + initrd + " " + UML::homedir +
 		      "/initrd");
 	SCR::Write (add (umlpath, "INITRD"), "initrd");
+
+	return true;
 
     };
 
