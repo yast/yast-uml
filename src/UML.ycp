@@ -32,6 +32,8 @@
 
     global string tap_device = "";
 
+    global string eth_device = "eth0";
+
 
     global define string propose_username() ``{
 
@@ -117,7 +119,7 @@
 	    "username"      : username,
 	    "groupname"     : "tun",
 	    "grouplist"     : $["tun":1],
-	    "type"          : "local"
+	    "type"          : "system"
 	];
 
 	boolean ret = false;

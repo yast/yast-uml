@@ -100,6 +100,9 @@
 	SCR::Write (add (umlpath, "TAP_DEVICE"), UML::tap_device);
 	SCR::Write (add (umlpath, "MAC_ADDRESS"), UML::MAC_address);
 
+	// connect virtual UML ethernet device to real device UML::eth_device
+	SCR::Write (add (umlpath, "ETH_DEVICE"), UML::eth_device);
+
 	SCR::Write (add (umlpath, "EXTRA_ARGS"), "");
 
     }

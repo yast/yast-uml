@@ -4,6 +4,11 @@ echo "Parsing $1..."
 . $1
 shift
 
+# set installation/run mode
+echo $* | grep "installation=" > /dev/null
+UML_RUN_MODE=$?
+
+
 UML_ARGS="umid=${USERNAME}"
 
 UML_ARGS="$UML_ARGS mem=${MEMORY}m ncups=${NCPUS}"
@@ -18,13 +23,16 @@ UML_ARGS="$UML_ARGS hwprobe=-sys"
 
 UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
 
-if true ; then	# for installation
+if [ $UML_RUN_MODE == "0" ]; then	# for installation
 
     UML_ARGS="$UML_ARGS ramdisk_size=65536"
     UML_ARGS="$UML_ARGS rootfstype=minix"
 
     UML_ARGS="$UML_ARGS con=pty ssl=none ssl0=xterm console=ttyS0"
     UML_ARGS="$UML_ARGS con3=xterm"
+else
+    # runtime mode
+    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE"
 fi
 
 UML_ARGS="$UML_ARGS $EXTRA_ARGS"
@@ -34,7 +42,6 @@ echo $KERNEL $UML_ARGS
 
 # create ethernet bridge
 
-ETH_DEVICE=eth0
 BRIDGE_NAME=$ETH_DEVICE
 
 if [ -z "$ETH_DEVICE" ]; then
@@ -83,7 +90,17 @@ chown $USERNAME ./.Xauthority
 
 # start UML machine
 echo "Starting uml..."
+# TODO FIXME
 /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
+
+
+# TODO start second stage in the installation mode
+if [ $UML_RUN_MODE == "0" ]; then
+    # TODO set root parameter
+    # start second stage 
+    /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
+fi
+
 
 # stop network devices
 
@@ -100,6 +117,8 @@ kill $SWITCH_PID
 # remove TAP device from bridge
 /sbin/brctl delif $BRIDGE_NAME $TAP_DEVICE
 
+# wait a while, sometimes tunctl fails...(?)
+sleep 1
 # remove TAP device
 /usr/bin/tunctl -d $TAP_DEVICE
 
