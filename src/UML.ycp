@@ -22,6 +22,8 @@
 
     global list <integer> disks = [ 1024 ];
 
+    global string start_mode = "manual";
+
     global string username = "";
 
     global string homedir = "";
