@@ -23,15 +23,21 @@ UML_ARGS="$UML_ARGS hwprobe=-sys"
 
 UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
 
+UML_ARGS="$UML_ARGS ssl=none"
+
+if [ -n "$UML_ROOT_DEVICE" ]; then
+    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE"
+fi
+
 if [ $UML_RUN_MODE == 0 ]; then	# for installation
 
     UML_ARGS="$UML_ARGS ramdisk_size=65536"
     UML_ARGS="$UML_ARGS rootfstype=minix"
-
-    UML_ARGS="$UML_ARGS con=pty con0=xterm con2=xterm con3=xterm con4=xterm ssl=none"
-else
+    UML_ARGS="$UML_ARGS textmode=1"
+    UML_ARGS="$UML_ARGS con=pty con0=xterm con2=xterm con3=xterm con4=xterm"
+#else
     # runtime mode
-    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE ssl=none"
+#    UML_ARGS="$UML_ARGS root=$UML_ROOT_DEVICE ssl=none"
 fi
 
 UML_ARGS="$UML_ARGS $EXTRA_ARGS"

@@ -213,27 +213,37 @@
 	// set root option and start second installation stage
 	register_options_file();
 
-	// TODO check existence of mtab file - if it doesn't exists do not start second stage
+	string root_file_name = UML::homedir + "root_dev";
 
-	map out = (map) SCR::Execute(.target.bash_output, "/bin/grep \" / \" %1 | cut -f 1 -d \" \"",  UML::homedir + "/mtab");
-	string root_dev = "";
+	// check existence of mtab file - if it doesn't exists
+	// then do not start second stage - installation probably failed
+	integer sz = (integer)SCR::Read(.target.size, root_file_name);
 
-	if (out["exit"]:-1 != 0 )
+	if (sz > 0)
 	{
-	     root_dev = (string) (out["stdout"]:"");
-	     list<string> root_dev_list = splitstring(root_dev, "\n");
-	     root_dev = root_dev_list[0]:"";
+	    map out = (map) SCR::Execute(.target.bash_output, "/usr/bin/cut -f 1 -d \" \"", root_file_name);
+	    string root_dev = "";
 
-	     // TODO remove mtab file
+	    if (out["exit"]:-1 != 0 )
+	    {
+		 root_dev = (string) (out["stdout"]:"");
+		 list<string> root_dev_list = splitstring(root_dev, "\n");
+		 root_dev = root_dev_list[0]:"";
+
+		 // remove mtab file
+		SCR::Execute (.target.bash, "/bin/rm " + root_file_name);
+	    }
+
+	    y2milestone("UML root device: %1", root_dev);
+	    SCR::Write (add (umlpath, "UML_ROOT_DEVICE"), "linux");
+
+	    unregister_options_file();
+
+	    y2milestone("Starting second installation stage...");
+
+	    // add empty install command
+	    SCR::Execute (.target.bash, uml_command + "install=");
 	}
-
-	y2milestone("UML root device: %1", root_dev);
-	SCR::Write (add (umlpath, "UML_ROOT_DEVICE"), "linux");
-
-	unregister_options_file();
-
-	y2milestone("Starting second installation stage...");
-	SCR::Execute (.target.bash, uml_command);
     }
 
 
@@ -265,19 +275,23 @@
 				     // progress stages
 				     _("Create virtual disks"),
 				     // progress stages
-				     _("Copy kernel and initrd")
+				     _("Copy kernel and initrd"),
+				     // progress stages
+				     _("Start UML installation")
     ];
 
     list progress_descriptions = [];
 
-    integer progress_length = 16;
+    integer progress_length = size(progress_stages);
 
     // Headline for UML Installation
     string headline = _("Preparing UML Installation");
 
-    // FIXME
-    string help_text = "FIXME.";
+    // help text
+    string help_text = _("<P><B>Installation</B></P><P>Preparing UML virtual machine for installation...</P>");
 
+    // enable progress
+    Progress::on();
 
     // Headline for UML Installation
     Progress::New (headline, "", progress_length,
@@ -306,8 +320,9 @@
 
     unregister_options_file ();
 
-    Progress::Finish ();
+    Progress::NextStage ();
 
+    Progress::Finish ();
 
     start_uml ();
 
