@@ -101,6 +101,17 @@
     };
 
 
+    /**
+     *
+     */
+    define void start_uml () ``{
+
+	SCR::Execute (.target.bash, "cd " + UML::homedir + " ; " +
+		      Directory::ybindir + "/start-uml");
+
+    }
+
+
     // FIXME, show progress
 
 
@@ -127,6 +138,9 @@
     copy_files ();
 
     unregister_options_file ();
+
+
+    start_uml ();
 
 
     return `next;
