@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 30 10:29:14 CEST 2004 - arvin@suse.de
+
+- also install bridge-utils
+
+-------------------------------------------------------------------
 Mon Mar 29 18:07:41 CEST 2004 - arvin@suse.de
 
 - adapted to changes in yast2-users

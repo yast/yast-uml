@@ -28,7 +28,8 @@
 
 	if (!Package::InstallAll (["um-host-kernel",
 				   "um-host-install-initrd",
-				   "uml-utilities"]))
+				   "uml-utilities",
+				   "bridge-utils"]))
 	{
 	    Report::Error (_("Cannot install required packages."));
 	    return false;
