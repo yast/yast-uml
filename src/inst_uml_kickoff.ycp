@@ -12,8 +12,10 @@
     import "UML";
     import "Directory";
     import "Report";
+    import "Package";
 
     textdomain "uml";
+
 
     path umlpath = .uml.options;
 
@@ -78,19 +80,29 @@
     }
 
 
-    if (UML::CreateUser())
+    if (!Package::InstallAll (["um-host-kernel",
+			       "um-host-install-initrd",
+			       "uml-utilities"]))
     {
-	register_options_file ();
-
-	save_options ();
-	make_disks ();
-
-	unregister_options_file ();
+	Report::Error (_("Cannot install required packages."));
+	return `abort;
     }
-    else
+
+
+    if (!UML::CreateUser())
     {
-	Report::Error(sformat(_("Cannot create UML user %1"), UML::username));
+	Report::Error (sformat(_("Cannot create UML user %1"), UML::username));
+	return `abort;
     }
+
+
+    register_options_file ();
+
+    save_options ();
+    make_disks ();
+
+    unregister_options_file ();
+
 
     return `next;
 }
