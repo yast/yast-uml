@@ -44,9 +44,16 @@
 				    )
 			      );
 
+    // TODO: set to real script
+    string script_name = "/etc/init.d/uml";
+
     // help text for uml options
-    string help_text = _("<p>FIXME</p>
-");
+    string help_text = _("<P><B>Options</B></P>")
+    + _("<P>You can set how much host system memory will be used by virtual machine.</P>")
+    + _("<P>UML machine can be started automatically on boot or manually when needed.</P>")
+    + sformat(_("<P>Use <I>%1</I> script for starting or stopping virtual machines or set
+start mode <I>on boot</I> for automatic start.</P>"), script_name)
+    ;
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));

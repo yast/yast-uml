@@ -67,9 +67,10 @@
 				)
 			  );
 
-    // help text for backup dialog during update 1/7
-    string help_text = _("<p>FIXME</p>
-");
+    // help text for UML disk setup
+    string help_text = _("<P><B>Virtual disk setup<B></P>")
+    + _("<P>Here you can configure number and size of virtual disks.
+Content of each virtual disk is stored in file in the host system.</P>");
 
     Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
 			 (boolean) WFM::Args(1));

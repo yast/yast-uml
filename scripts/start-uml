@@ -32,7 +32,6 @@ fi
 if [ $UML_RUN_MODE == 0 ]; then	# for installation
 
     UML_ARGS="$UML_ARGS ramdisk_size=65536"
-    UML_ARGS="$UML_ARGS rootfstype=minix"
     UML_ARGS="$UML_ARGS textmode=1"
     UML_ARGS="$UML_ARGS con=pty con0=xterm con2=xterm con3=xterm con4=xterm"
 #else
