@@ -1,6 +1,8 @@
 #!/bin/bash
 
-. OPTIONS
+echo "Parsing $1..."
+. $1
+shift
 
 UML_ARGS="umid=${USERNAME}"
 
@@ -41,4 +43,5 @@ echo $KERNEL $UML_ARGS
 chown $USERNAME:users ./.Xauthority
 
 # start UML machine
+echo "Starting uml..."
 /bin/su -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
