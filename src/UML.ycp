@@ -26,6 +26,10 @@
 
     global string homedir = "";
 
+    global string MAC_address = "";
+
+    global string tap_device = "";
+
 
     global define string propose_username() ``{
 
@@ -72,8 +76,9 @@
 	    "userPassword"  : "",
 	    "create_home"   : true,
 	    "loginShell"    : "/bin/false",
-//	    "username"      : username, yast2-users changed internal key name...
-	    "uid"           : username,
+	    "no_skeleton"   : true,
+	    "username"      : username, //yast2-users changed internal key name...
+//	    "uid"           : username,
 	    "type"          : "local"
 	];
 
@@ -112,6 +117,21 @@
 	homedir = propose_homedir(username);
     }
 
+    global string propose_MAC_address() ``{
+	string command = sformat("echo %1 | md5sum", UML::homedir + "/ubd0");
+	map<string,any> out = (map<string,any>)SCR::Execute(.target.bash_output, command);
+	list<string> result= splitstring(out["stdout"]:"", "\n");
+
+	y2debug("result[0]: %1", result[0]:"");
+	string ret = regexpsub(result[0]:"", "^(..)(..)(..)(..).*", "fe:fd:\\1:\\2:\\3:\\4");
+
+	return ret;
+    }
+
+    global void NetworkInitialize() ``{
+	tap_device = username;
+	MAC_address = propose_MAC_address();
+    }
 
     global void propose_selection () ``{
 	list <integer> sources = Pkg::SourceGetCurrent (false);
@@ -121,6 +141,7 @@
 
     global void UML() ``{
 	UserInitialize();
+	NetworkInitialize();
 	propose_selection ();
     }
 }

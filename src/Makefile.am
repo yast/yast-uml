@@ -14,7 +14,11 @@ client_DATA =				\
 	inst_uml_user.ycp		\
 	inst_uml_options.ycp		\
 	inst_uml_disks.ycp		\
-	inst_uml_kickoff.ycp
+	inst_uml_kickoff.ycp		\
+	inst_uml_options.ycp		\
+	inst_uml_network.ycp		\
+	uml_network_proposal.ycp	\
+	inst_uml_user.ycp
 
 ynclude_DATA =
 

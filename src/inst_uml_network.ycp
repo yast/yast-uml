@@ -1,0 +1,93 @@
+/**
+ * Module:	inst_uml_network.ycp
+ *
+ * Authors:	Ladislav Slezak <lslezak@suse.cz>
+ *
+ * Purpose:	Ask the user for network settings.
+ */
+
+{
+    textdomain "uml";
+
+    import "UML";
+    import "Wizard";
+    import "Popup";
+    import "Report";
+
+    define boolean Check_MAC(string mac) ``{
+	return regexpmatch(mac, "^[0-9a-fA-F][0-9a-fA-F](:[0-9a-fA-F][0-9a-fA-F]){5}$");
+    }
+
+    // screen title for uml options
+    string title = _("Network Settings");
+
+    // build and show dialog
+    Wizard::OpenAcceptDialog ();
+
+    term contents = `HVSquash(
+	`VBox(
+
+	    `VSpacing (1),
+
+	    `Left(`TextEntry(`id(`tap_device),
+		    // text entry label
+		    _("Device Name"),
+		    UML::tap_device
+		)
+	    ),
+
+	    `VSpacing(1),
+
+	    `Left(`TextEntry(`id(`MAC_address),
+		    // text entry label
+		    _("MAC Address"),
+		    UML::MAC_address
+		)
+	    )
+	)
+    );
+
+    // help text for uml user settings
+    string help_text = _("<p><b>Network Settings</b></p><br><p>Here you can set TAP device name which is used for communication with virtual machine.</p>")
+	+ _("<p>Each virtual machine have virtual ethernet network card. MAC address is unique identification of ethernet network card.</p>")
+    ;
+
+    Wizard::SetContents (title, contents, help_text, true, true);
+
+    // allow only valid characters
+    UI::ChangeWidget (`id (`MAC_address), `ValidChars, "0123456789:abcdefABCDEF");
+
+
+    any ret = nil;
+
+    while (ret != `cancel && ret != `back && ret != `next)
+    {
+	ret = Wizard::UserInput ();
+
+	if (ret == `cancel || ret == `back)
+	    break;
+
+	if (ret == `next)
+	{
+	    string MAC_address = (string) UI::QueryWidget (`id(`MAC_address), `Value);
+	    string tap_device = (string) UI::QueryWidget (`id(`tap_device), `Value);
+
+	    if (!Check_MAC(MAC_address))
+	    {
+		// error message
+                Report::Error(_("Entered MAC address is not valid."));
+                UI::SetFocus(`id(`MAC_address));
+		ret = `again;
+	    }
+	    else
+	    {
+		UML::MAC_address = MAC_address;
+		UML::tap_device = tap_device;
+	    }
+	}
+    }
+
+    Wizard::CloseDialog();
+
+    return ret;
+}
