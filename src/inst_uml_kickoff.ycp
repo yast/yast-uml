@@ -50,6 +50,8 @@
 
 	SCR::Write (add (umlpath, "USERNAME"), UML::username);
 
+	SCR::Write (add (umlpath, "EXTRA_ARGS"), "");
+
     }
 
 
@@ -80,6 +82,28 @@
     }
 
 
+    /**
+     *
+     */
+    define void copy_files () ``{
+
+	string kernel = "/usr/bin/linux-2.6.3-27-um"; // FIXME
+	string initrd = "/usr/lib/initrd"; // FIXME
+
+	SCR::Execute (.target.bash, "/bin/cp " + kernel + " " + UML::homedir +
+		      "/linux");
+	SCR::Write (add (umlpath, "KERNEL"), "linux");
+
+	SCR::Execute (.target.bash, "/bin/cp " + initrd + " " + UML::homedir +
+		      "/initrd");
+	SCR::Write (add (umlpath, "INITRD"), "initrd");
+
+    };
+
+
+    // FIXME, show progress
+
+
     if (!Package::InstallAll (["um-host-kernel",
 			       "um-host-install-initrd",
 			       "uml-utilities"]))
@@ -100,6 +124,7 @@
 
     save_options ();
     make_disks ();
+    copy_files ();
 
     unregister_options_file ();
 

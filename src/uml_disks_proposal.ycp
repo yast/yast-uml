@@ -41,6 +41,8 @@
 	    i = i + 1;
 	});
 
+	// FIXME, space check
+
 	ret = $[ "preformatted_proposal" :
 		 HTML::List (tmp)
 	];
