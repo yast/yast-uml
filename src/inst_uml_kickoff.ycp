@@ -205,6 +205,24 @@
     }
 
 
+    define boolean set_tun_permissions() ``{
+	boolean ret = false;
+
+	// set "tun" group
+	string command = "/bin/chgrp tun /dev/net/tun";
+	ret = (SCR::Execute(.target.bash, command) == 0);
+
+	if (ret == true)
+	{
+	    // set RW access to device /dev/net/tun for group
+	    command = "/bin/chmod g+rw /dev/net/tun";
+	    ret = (SCR::Execute(.target.bash, command) == 0);
+	}
+
+	return ret;
+    }
+
+
     list <string> progress_stages = [
 				     // progress stages
 				     _("Install packages"),
@@ -238,6 +256,7 @@
     Progress::NextStage ();
 
     create_user ();
+    set_tun_permissions();
 
     Progress::NextStage ();
 

@@ -67,20 +67,56 @@
 	return (user_name != nil) ? (Users::GetDefaultHome("local") + user_name) : nil;
     }
 
+    global define boolean CreateTunGroup() ``{
+	string error = Users::CheckGroupname("tun");
+	boolean ret = false;
+
+	y2internal("error: '%1'", error);
+	if (error == "")
+	{
+	    Users::ResetCurrentGroup();
+
+	    // create "tun" group
+	    map<string, any> grp = Users::GetCurrentGroup();
+	    grp["cn"] = "tun";
+	    grp["type"] = "local";
+
+	    ret = Users::AddGroup(grp);
+	    y2internal("ret: %1", ret);
+
+	    if (ret == true)
+	    {
+		ret = Users::CommitGroup();
+	    }
+
+	    return ret;
+	}
+
+	y2internal("ret: %1", ret);
+	return true;
+    }
 
     /**
      * Create specified UML user account in the system.
      * @return boolean true on success
      */
     global define boolean CreateUser() ``{
+
+	if (CreateTunGroup() == false)
+	{
+	    Report::Error(_("Cannot create group \"tun\"."));
+	    return false;
+	}
+
 	map<string,any> user = $[
-	    "homeDirectory" : homedir,
-	    "userPassword"  : "",
+	    "homedirectory" : homedir,
+	    "userpassword"  : "",
 	    "create_home"   : true,
-	    "loginShell"    : "/bin/false",
+	    "loginshell"    : "/bin/false",
 	    "no_skeleton"   : true,
-	    "username"      : username, //yast2-users changed internal key name...
-//	    "uid"           : username,
+	    "username"      : username,
+	    "groupname"     : "tun",
+	    "grouplist"     : $["tun":1],
 	    "type"          : "local"
 	];
 
@@ -97,7 +133,7 @@
 
 	    // don't show progress
 	    Users::SetGUI(false);
-	    ret = Users::Write() != "";
+	    ret = Users::Write() == "";
 	}
 	else
 	{
