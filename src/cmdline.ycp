@@ -19,6 +19,7 @@
     import "Progress";
     import "Wizard";
     import "UsersCache";	// ?? required for initialization of the module
+    import "GetInstArgs";
 
     textdomain "uml";
 
@@ -28,7 +29,8 @@
 	Wizard::SetDesktopIcon ("uml");
 
 	// calling inst_proposal
-	symbol ret = (symbol) WFM::CallFunction ("inst_proposal", [true, true, `uml]);
+	symbol ret = (symbol) WFM::CallFunction ("inst_proposal", 
+                [GetInstArgs::makeProposalArgs(true,true,"uml")]);
 
 	if (ret == `next)
 	{
