@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jun 22 16:13:18 CEST 2004 - lslezak@suse.cz
+
+- improved installation selection dialog: support even not
+  configured sources, SLP support (#41704)
+- added missing shortcuts
+- fixed file headers
+
+-------------------------------------------------------------------
 Thu Jun 10 09:24:07 CEST 2004 - lslezak@suse.cz
 
 - removed unnecessary Users:: imports, reenabled error popups

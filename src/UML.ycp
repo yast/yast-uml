@@ -16,6 +16,10 @@
 
     global integer source_id = 0;
 
+    global symbol inst_type = `configured;
+
+    global string custom_source = "";
+
     global integer memory_size = 256;
 
     global integer number_of_cpus = 1;
@@ -180,6 +184,15 @@
     global void propose_selection () ``{
 	list <integer> sources = Pkg::SourceGetCurrent (false);
 
+	list<map> installed_products = (list<map>)Pkg::TargetProducts();
+	map last_product = $[];
+
+	if (size(installed_products) > 0)
+	{
+	    // select the last installed product
+	    last_product = installed_products[size(installed_products) - 1]:$[];
+	}
+
 	foreach(integer src, sources, ``{
 		map general_data = Pkg::SourceGeneralData(src);
 		string srcurl = general_data["url"]:"";
@@ -190,8 +203,13 @@
 		    y2milestone("Found network source: %1", src);
 		    source_id = src;
 		}
+
+		y2milestone("Pkg::SourceProductData: %1", Pkg::SourceProductData(src));
 	    }
 	);
+
+	// proposed installation type is configured source
+	inst_type = `configured;
     }
 
 

@@ -213,8 +213,21 @@
      */
     define void start_uml () ``{
 
-	map general_data = Pkg::SourceGeneralData (UML::source_id);
-	string url = general_data["url"]:"";
+	string url = "";
+
+	if (UML::inst_type == `configured)
+	{
+	    map general_data = Pkg::SourceGeneralData (UML::source_id);
+	    url = general_data["url"]:"";
+	}
+	else if (UML::inst_type == `custom)
+	{
+	    url = UML::custom_source;
+	}
+	else if (UML::inst_type == `slp)
+	{
+	    url = "slp://";
+	}
 
 	string uml_command = "cd " + UML::homedir + " ; " +
 	    Directory::ybindir + "/start-uml " +

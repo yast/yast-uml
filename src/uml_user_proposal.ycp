@@ -1,9 +1,12 @@
 /**
- * Module:	proposal_uml_user.ycp
+ * Module:	uml_user_proposal.ycp
  *
  * Author:	Ladislav Slezak <lslezak@suse.cz>
  *
  * Purpose:     Proposal for uml user
+ *
+ * $Id$
+ *
  */
 
 {

@@ -4,6 +4,9 @@
  * Authors:	Ladislav Slezak <lslezak@suse.cz>
  *
  * Purpose:	Ask the user for user settings for uml.
+ *
+ * $Id$
+ *
  */
 
 {
@@ -27,14 +30,14 @@
 	`VBox(
 	    `Left(`TextEntry(`id(`username),
 		    // text entry label
-		    _("Login Name"),
+		    _("&Login Name"),
 		    UML::username
 		)
 	    ),
 	    `VSpacing(1),
 	    `Left(`TextEntry(`id(`homedir),
 		    // text entry label
-		    _("Home Directory"),
+		    _("&Home Directory"),
 		    UML::homedir
 		)
 	    )
@@ -42,12 +45,12 @@
     );
 
     // help text for uml user settings
-    string help_text = _("<p><b>User Settings</b></p><br><p>Here, set the UML user account.</p>")
+    string help_text = _("<p><b>User Settings</b><br></p>")
+        // help text for uml user settings
+	+ _("<p>Here, set the UML user account.</p>")
+	// help text for uml user settings
 	+ _("<p>Kernel and disk image will be stored in the <b>home directory</b> of the UML user.</p>")
     ;
-
-//    Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
-//			 (boolean) WFM::Args(1));
 
     Wizard::SetContents (title, contents, help_text, true, true);
 

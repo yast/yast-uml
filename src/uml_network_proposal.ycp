@@ -1,9 +1,12 @@
 /**
- * Module:	proposal_uml_network.ycp
+ * Module:	uml_network_proposal.ycp
  *
  * Author:	Ladislav Slezak <lslezak@suse.cz>
  *
  * Purpose:     UML network proposal
+ *
+ * $Id$
+ *
  */
 
 {

@@ -4,6 +4,9 @@
  * Author:	Arvin Schnell <arvin@suse.de>
  *
  * Purpose:     Proposal for uml installation source
+ *
+ * $Id$
+ *
  */
 {
     textdomain "uml";
@@ -28,13 +31,28 @@
 	    UML::propose_selection ();
 	}
 
-	if (UML::source_id > 0)
+	if (UML::inst_type == `configured && UML::source_id > 0)
 	{
 	    map product_data = Pkg::SourceProductData (UML::source_id);
 	    map general_data = Pkg::SourceGeneralData (UML::source_id);
 	    ret = $[ "preformatted_proposal" :
 		     HTML::List ([product_data["label"]:"unknown" + " (" +
 				  general_data["url"]:"" + ")"])
+	    ];
+	}
+	else if (UML::inst_type == `custom)
+	{
+	    ret = $[ "preformatted_proposal" :
+		    // installation proposal header
+		    HTML::List ([_("Custom Installation Source") + " (" +
+				  UML::custom_source + ")"])
+	    ];
+	}
+	else if (UML::inst_type == `slp)
+	{
+	    ret = $[ "preformatted_proposal" :
+		    // installation proposal header
+		    HTML::List ([_("SLP Installation Source")])
 	    ];
 	}
 	else
@@ -61,7 +79,7 @@
 		// this is a heading
 		"rich_text_title"	: _("Source"),
 		// this is a menu entry
-		"menu_title"		: _("&Source"),
+		"menu_title"		: _("Installation &Source"),
 		"id"			: "uml_source_stuff"
 	];
     }
