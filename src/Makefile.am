@@ -1,17 +1,20 @@
+#
 # Makefile.am for uml/src
+#
 
 yncludedir = @yncludedir@/uml
 
 client_DATA =				\
 	uml.ycp				\
-	uml_disks_proposal.ycp		\
-	uml_options_proposal.ycp	\
+	uml_source_proposal.ycp		\
 	uml_user_proposal.ycp		\
-	inst_uml_disks.ycp		\
-	inst_uml_kickoff.ycp		\
+	uml_options_proposal.ycp	\
+	uml_disks_proposal.ycp		\
+	inst_uml_source.ycp		\
+	inst_uml_user.ycp		\
 	inst_uml_options.ycp		\
-	inst_uml_user.ycp
-
+	inst_uml_disks.ycp		\
+	inst_uml_kickoff.ycp
 
 ynclude_DATA =
 

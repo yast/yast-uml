@@ -1,0 +1,103 @@
+/**
+ * Module: 	inst_uml_source.ycp
+ *
+ * Authors:	Arvin Schnell <arvin@suse.de>
+ *
+ * Purpose:	Ask the user for installation source for uml.
+ */
+{
+    textdomain "uml";
+
+    import "UML";
+    import "Label";
+    import "Popup";
+    import "Wizard";
+
+
+    // screen title for uml source
+    string title = _("Installation Source");
+
+
+    list <map <string, any> > sources = Pkg::SourceEditGet ();
+
+
+    define term create_item (integer index, map source) ``{
+        integer id = source["SrcId"]:0;
+        map product_data = Pkg::SourceProductData (id);
+        map general_data = Pkg::SourceGeneralData (id);
+        return `item (`id (index),
+		      product_data["label"]:"unknown",
+		      general_data["url"]:"");
+    }
+
+
+    define void fill_table () ``{
+
+	integer i = 0;
+        list items = [];
+	integer j = -1;
+
+        while (i < size (sources))
+	{
+	    map source = sources[i]:$[];
+	    items = add (items, create_item (i, source));
+	    if (source["SrcId"]:0 == UML::source_id)
+		j = i;
+	    i = i + 1;
+        }
+
+        UI::ChangeWidget (`id (`sources), `Items, items);
+	if (j > -1)
+	    UI::ChangeWidget (`id(`sources), `CurrentItem, j);
+    }
+
+
+    // build and show dialog
+
+    Wizard::OpenAcceptDialog ();
+
+    term contents = `VBox(
+			  `VBox(
+				`Left(`Table(`id(`sources),
+					     `opt(`keepSorting),
+					     // column heading
+					     `header(_("Name"), _("URL")),
+					     [ ]))
+				)
+			  );
+
+    // help text for backup dialog during update 1/7
+    string help_text = _("<p>FIXME</p>
+");
+
+    Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
+			 (boolean) WFM::Args(1));
+
+    fill_table ();
+
+    symbol ret = nil;
+
+    while (true)
+    {
+	ret = (symbol) Wizard::UserInput ();
+
+	if (ret == `abort && Popup::ConfirmAbort (`painless))
+	    break;
+
+	if (ret == `cancel || ret == `back)
+	    break;
+
+	if (ret == `next)
+	{
+	    integer current = (integer) UI::QueryWidget (`id(`sources),
+							 `CurrentItem);
+	    map <string, any> source = sources[current]:$[];
+            UML::source_id = source["SrcId"]:0;
+	    break;
+	}
+    }
+
+    Wizard::CloseDialog ();
+
+    return ret;
+}

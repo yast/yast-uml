@@ -6,7 +6,6 @@
  *
  * $Id$
  */
-
 {
     module "UML";
 
@@ -14,6 +13,8 @@
     import "Report";
 
     textdomain "uml";
+
+    global integer source_id = 0;
 
     global integer memory_size = 256;
 
@@ -27,6 +28,7 @@
 
 
     global define string propose_username() ``{
+
 	string userprefix = "uml";
 	integer index = 0;
 	// limit number of user names for trying
@@ -97,6 +99,7 @@
 	return ret;
     }
 
+
     global void UserInitialize() ``{
 	// initialize Users:: module
 	Users::SetGUI(false);
@@ -108,8 +111,15 @@
     }
 
 
-    global void UML() ``{
-	UserInitialize();
+    global void propose_selection () ``{
+	list <map <string, any> > sources = Pkg::SourceEditGet ();
+	map <string, any> source = sources[0]:$[];
+	source_id = source["SrcId"]:0;
     }
 
+
+    global void UML() ``{
+	UserInitialize();
+	propose_selection ();
+    }
 }
