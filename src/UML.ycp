@@ -87,8 +87,7 @@
 	    grp["cn"] = "tun";
 	    grp["type"] = "local";
 
-//	    ret = Users::AddGroup(grp) == "";
-	    ret = Users::AddGroup(grp);
+	    ret = Users::AddGroup(grp) == "";
 	    y2debug("Users::AddGroup: %1", ret);
 
 	    if (ret == true)
@@ -134,8 +133,7 @@
 
 	Users::ResetCurrentUser ();
 
-//	if (Users::AddUser(user) == "")
-	if (Users::AddUser(user))
+	if (Users::AddUser(user) == "")
 	{
 	    Users::CommitUser();
 

@@ -32,7 +32,7 @@
 	// we are already in UML, for nested UML we would need
 	// nested UML kernel (CONFIG_NEST_LEVEL=1) which is not present
 	Report::Error(_("UML installation cannot be started inside UML machine.
-Please start UML installation in the host system."));
+Start UML installation in the host system."));
 
 	Wizard::CloseDialog ();
 	return `abort;
