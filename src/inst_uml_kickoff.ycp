@@ -88,6 +88,12 @@
 
 	SCR::Write (add (umlpath, "EXTRA_ARGS"), "");
 
+	// flush
+	SCR::Write (umlpath, nil);
+	// change owner
+	SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/OPTIONS", UML::username, UML::homedir));
+	// change mode
+	SCR::Execute(.target.bash, sformat("/bin/chmod 0600 %1/OPTIONS", UML::homedir));
     }
 
 
@@ -108,6 +114,10 @@
 	    string cmd = "/bin/dd if=/dev/zero of=" + UML::homedir + "/" +
 		disk_file + " bs=1M " + sformat ("count=%1", s);
 	    SCR::Execute (.target.bash, cmd);
+	    // change owner
+	    SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/%3", UML::username, UML::homedir, disk_file));
+	    // change mode
+	    SCR::Execute(.target.bash, sformat("/bin/chmod 0600 %1/%2", UML::homedir, disk_file));
 
 	    i = i + 1;
 
@@ -147,10 +157,18 @@
 
 	SCR::Execute (.target.bash, "/bin/cp " + kernel + " " + UML::homedir +
 		      "/linux");
+	// change owner
+	SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/linux", UML::username, UML::homedir));
+	// change mode
+	SCR::Execute(.target.bash, sformat("/bin/chmod 0700 %1/linux", UML::homedir));
 	SCR::Write (add (umlpath, "KERNEL"), "linux");
 
 	SCR::Execute (.target.bash, "/bin/cp " + initrd + " " + UML::homedir +
 		      "/initrd");
+	// change owner
+	SCR::Execute(.target.bash, sformat("/bin/chown %1:users %2/initrd", UML::username, UML::homedir));
+	// change mode
+	SCR::Execute(.target.bash, sformat("/bin/chmod 0600 %1/initrd", UML::homedir));
 	SCR::Write (add (umlpath, "INITRD"), "initrd");
 
 	return true;
