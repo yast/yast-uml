@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun 14 10:00:40 CEST 2005 - lslezak@suse.cz
+
+- added uml_finish client (code from inst_finish)
+- 2.12.0
+
+-------------------------------------------------------------------
 Mon Mar 21 16:58:05 CET 2005 - lslezak@suse.cz
 
 - enable access to X server for uml user, copy correct uml kernel

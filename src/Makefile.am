@@ -10,6 +10,7 @@ client_DATA =				\
 	uml_user_proposal.ycp		\
 	uml_options_proposal.ycp	\
 	uml_disks_proposal.ycp		\
+	uml_finish.ycp			\
 	inst_uml_source.ycp		\
 	inst_uml_user.ycp		\
 	inst_uml_options.ycp		\
