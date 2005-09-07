@@ -34,11 +34,7 @@
 
 	if (ret == `next)
 	{
-	    while (WFM::CallFunction ("inst_uml_kickoff", [false, false]) == `abort)
-	    {
-		// start proposal again if installation was aborted
-		WFM::CallFunction ("inst_proposal", [GetInstArgs::ButtonsProposal(true,true,"uml")]);
-	    }
+	    WFM::CallFunction("inst_uml_kickoff", [false, false]);
 	}
 
 	Wizard::CloseDialog ();

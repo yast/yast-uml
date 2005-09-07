@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Sep  7 08:49:50 CEST 2005 - lslezak@suse.cz
+
+- fixed Table widget layout (#115175)
+- xdpyinfo from xf86tools package is part of xorg-x11
+  package now (#115426)
+- abort of an installation works properly (#115173)
+- 2.12.1
+
+-------------------------------------------------------------------
 Tue Jun 14 10:00:40 CEST 2005 - lslezak@suse.cz
 
 - added uml_finish client (code from inst_finish)
