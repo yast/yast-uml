@@ -31,7 +31,7 @@
 				   "um-host-install-initrd",
 				   "uml-utilities",
 				   "bridge-utils",
-				   "xf86tools"
+				   "xorg-x11"
 				   ]))
 	{
 	    Report::Error (_("Cannot install required packages."));

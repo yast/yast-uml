@@ -68,13 +68,11 @@
 				// radio button label
 				`Left(`RadioButton(`id(`configured),  `opt(`notify), _("&Configured Installation Source"), UML::inst_type == `configured)),
 				`VSpacing(0.3),
-				`Left(
-				    `HBox(
-					`HSpacing(indent),
-					`Table(`id(`sources),
-					    // table column heading
-					    `header(_("Name"), _("URL")), [ ]
-					)
+				`HBox(
+				    `HSpacing(indent),
+				    `Table(`id(`sources),
+					// table column heading
+					`header(_("Name"), _("URL")), [ ]
 				    )
 				),
 				// push button label
