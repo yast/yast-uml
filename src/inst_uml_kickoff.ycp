@@ -31,6 +31,7 @@
 				   "um-host-install-initrd",
 				   "uml-utilities",
 				   "bridge-utils",
+				   "xterm",
 				   "xorg-x11"
 				   ]))
 	{

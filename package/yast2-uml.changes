@@ -1,9 +1,8 @@
 -------------------------------------------------------------------
-Wed Sep  7 08:49:50 CEST 2005 - lslezak@suse.cz
+Fri Sep  9 09:01:05 CEST 2005 - lslezak@suse.cz
 
 - fixed Table widget layout (#115175)
-- xdpyinfo from xf86tools package is part of xorg-x11
-  package now (#115426)
+- require org-x11 and xterm packages (#115426)
 - abort of an installation works properly (#115173)
 - 2.12.1
 
