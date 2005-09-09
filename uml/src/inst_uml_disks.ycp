@@ -1,0 +1,184 @@
+/**
+ * Module:	inst_uml_disks.ycp
+ *
+ * Authors:	Arvin Schnell <arvin@suse.de>
+ *
+ * Purpose:	Ask the user for virtual disks for uml.
+ *
+ * $Id$
+ *
+ */
+{
+    textdomain "uml";
+
+    import "UML";
+    import "Label";
+    import "Popup";
+    import "Wizard";
+
+
+    // screen title for uml disks
+    string title = _("Virtual Disks");
+
+    list<map<string,any> > disks = UML::disks;
+
+
+    define map<string,any> ask_size (integer s, boolean sparse) ``{
+
+	UI::OpenDialog (`opt(`decorated),
+			// heading in a popup dialog
+			`VBox(`Heading(_("Size of Virtual Disk") ),
+			      `VSpacing(0.5),
+			      `ComboBox(`id(`size), `opt(`editable),
+					// combobox label
+					_("&Disk Size in MB:"),
+					["512", "1024", "2048", "4096"]),
+			      `VSpacing(0.8),
+			      `CheckBox(`id(`sparse), _("Create &Sparse Image File"), sparse),
+			      `VSpacing(1),
+			      `HBox(
+				    `PushButton(`id(`ok), `opt(`default), Label::OKButton()),
+				    `PushButton(`id(`cancel), Label::CancelButton())
+				    )
+			      )
+			);
+
+	UI::ChangeWidget (`id(`size), `ValidChars, "0123456789");
+	UI::ChangeWidget (`id(`size), `Value, tostring (s));
+
+	if ((symbol) UI::UserInput() == `ok)
+	    s = tointeger ((string) UI::QueryWidget (`id(`size), `Value));
+	else
+	    s = -1;
+
+	boolean sparse_file = (boolean) UI::QueryWidget (`id(`sparse), `Value);
+
+	UI::CloseDialog ();
+
+	y2internal("ret: %1", $[ "size" : s, "sparse" : sparse_file ]);
+
+	return $[ "size" : s, "sparse" : sparse_file ];
+    }
+
+    define void refresh_table(list<map<string,any> > disks)
+    {
+	integer id_cnt = 0;
+	list <term> d = [];
+	foreach (map<string,any> m, disks, ``{
+	    d = add(d, `item (`id(id_cnt), m["size"]:0, (m["sparse"]:false) ? UI::Glyph(`CheckMark) : ""));
+	    id_cnt = id_cnt + 1;
+	});
+	UI::ChangeWidget (`id(`disks), `Items, d);
+    }
+
+    // build and show dialog
+
+    Wizard::OpenAcceptDialog ();
+
+    term contents = `VBox(
+			  `Table(`id(`disks),
+				// table - column heading
+				`header (`Right(_("Disk Size (MB)")), `Center(_("Sparse File"))), []
+			  ),
+			  `HBox(
+				`PushButton (`id (`add), Label::AddButton()),
+				`PushButton (`id (`edit), Label::EditButton()),
+				`PushButton (`id (`delete), Label::DeleteButton())
+				)
+			  );
+
+    // help text for UML disk setup
+    string help_text = _("<P><B>Virtual Disk Setup<B></P>")
+    + _("<P>Here, configure number and size of virtual disks.
+The content of each virtual disk is stored in a file in the host system.</P>
+");
+
+    // TODO: add sparse option help text
+
+    Wizard::SetContents (title, contents, help_text, (boolean) WFM::Args(0),
+			 (boolean) WFM::Args(1));
+
+    refresh_table(disks);
+
+    symbol ret = nil;
+
+    while (true)
+    {
+	ret = (symbol) Wizard::UserInput ();
+
+	if (ret == `abort && Popup::ConfirmAbort (`painless))
+	    break;
+
+	if (ret == `cancel || ret == `back)
+	    break;
+
+	if (ret == `add)
+	{
+	    map<string,any> m = ask_size (1024, false);
+
+	    integer s = m["size"]:-1;
+	    if (s >= 0)
+	    {
+		disks = add(disks, m);
+		refresh_table(disks);
+	    }
+	}
+
+	if (ret == `edit)
+	{
+	    integer id = (integer) UI::QueryWidget (`id(`disks), `CurrentItem);
+	    if (id != nil)
+	    {
+		map<string,any> d = disks[id]:$[];
+		d = ask_size(d["size"]:0, d["sparse"]:false);
+
+		if (d["size"]:0 > 0)
+		{
+		    disks[id] = d;
+
+		    refresh_table(disks);
+		}
+	    }
+	}
+
+	if (ret == `delete)
+	{
+	    integer id = (integer) UI::QueryWidget (`id(`disks), `CurrentItem);
+
+	    if (id != nil)
+	    {
+		list<map<string,any> > new_disks = [];
+
+		foreach(map<string,any> m, disks, ``{
+			if (id != 0)
+			{
+			    new_disks = add(new_disks, m);
+			}
+			id = id - 1;
+		    }
+		);
+
+		disks = new_disks;
+		refresh_table(disks);
+	    }
+	}
+
+	if (ret == `next)
+	{
+	    if (size (disks) <= 0)
+	    {
+		// error popup
+		string message = _("At least one disk is required.");
+		Popup::Message (message);
+		continue;
+	    }
+
+	    UML::disks = disks;
+	    break;
+	}
+    }
+
+    Wizard::CloseDialog ();
+
+    return ret;
+}

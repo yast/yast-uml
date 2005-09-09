@@ -1,0 +1,126 @@
+#!/bin/bash
+
+echo "Parsing $1..."
+. $1
+shift
+
+export LD_ASSUME_KERNEL="2.4.21"
+
+# set installation/run mode
+echo $* | grep "install=" > /dev/null
+UML_RUN_MODE=$?
+
+# set general options
+UML_ARGS="umid=${USERNAME}"
+UML_ARGS="$UML_ARGS mem=${MEMORY}m ncups=${NCPUS}"
+
+# virtual disks
+for i in `seq 0 $(($NDISKS - 1))` ; do
+    eval d=\$DISK$i
+    UML_ARGS="$UML_ARGS ubd$i=$d"
+done
+
+UML_ARGS="$UML_ARGS initrd=./$INITRD"
+UML_ARGS="$UML_ARGS eth0=daemon,$MAC_ADDRESS,unix,$TAP_DEVICE.ctl"
+UML_ARGS="$UML_ARGS ssl=none"
+UML_ARGS="$UML_ARGS con=pts"
+
+if [ -n "$ROOT_DEVICE" ]; then
+    UML_ARGS="$UML_ARGS root=$ROOT_DEVICE"
+fi
+
+SU=/bin/su
+
+
+if [ $UML_RUN_MODE == 0 ]; then
+    # set installation options
+    UML_ARGS="$UML_ARGS ramdisk_size=65536"
+    UML_ARGS="$UML_ARGS textmode=1"
+    UML_ARGS="$UML_ARGS ssl0=xterm"
+    UML_ARGS="$UML_ARGS console=ttyS0"
+    UML_ARGS="$UML_ARGS term=xterm"
+    # disable all terminals except tty2 (debug shell)
+    UML_ARGS="$UML_ARGS con=none con2=pts"
+    SU=/usr/X11R6/bin/sux
+fi
+
+
+UML_ARGS="$UML_ARGS $EXTRA_ARGS"
+
+echo $KERNEL $UML_ARGS
+
+# network setup
+# create ethernet bridge
+
+BRIDGE_NAME=$ETH_DEVICE
+
+if [ -z "$ETH_DEVICE" ]; then
+    echo "Ethernet device name argument is missing"
+    exit 1;
+fi
+
+# check whether bridge already exists
+brctl show | grep ^$ETH_DEVICE > /dev/null || (
+    NEW_ETH_DEVICE="hw$ETH_DEVICE"
+
+    # stop network device
+    /sbin/rcnetwork stop $ETH_DEVICE
+
+    # change device name
+    ip link set $ETH_DEVICE name $NEW_ETH_DEVICE
+
+    # create bridge
+    brctl addbr $BRIDGE_NAME
+
+    # add ethernet device to bridge
+    brctl addif $BRIDGE_NAME $NEW_ETH_DEVICE
+
+    # set ethernet device up
+    ip link set $NEW_ETH_DEVICE up
+
+    # start network
+    /sbin/rcnetwork start $ETH_DEVICE
+)
+
+# create TAP device
+/usr/bin/tunctl -t $TAP_DEVICE -u $USERNAME
+
+# add TAP device to the ethernet bridge
+/sbin/brctl addif $BRIDGE_NAME $TAP_DEVICE
+
+# set device up
+/sbin/ip link set $TAP_DEVICE up
+
+# start uml_switch daemon
+#/bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > switch.out 2> switch.err < /dev/null" $USERNAME &
+/bin/su -s /bin/bash -c "echo \$\$ > uml_switch.pid; exec /usr/bin/uml_switch -tap $TAP_DEVICE -unix $TAP_DEVICE.ctl > /dev/null 2> /dev/null < /dev/null" $USERNAME &
+
+# start UML machine
+echo "Starting uml..."
+$SU -s /bin/bash -c "./$KERNEL $UML_ARGS $*" $USERNAME
+
+# disable X access
+if [ -e ./.Xauthority ]; then
+    rm ./.Xauthority
+fi
+
+# stop network devices
+
+# read switch PID
+SWITCH_PID=`cat uml_switch.pid`
+rm uml_switch.pid
+
+# stop switch daemon
+kill $SWITCH_PID
+
+# set TAP device down
+/sbin/ip link set $TAP_DEVICE down
+
+# remove TAP device from bridge
+/sbin/brctl delif $BRIDGE_NAME $TAP_DEVICE
+
+# wait a while, sometimes tunctl fails...(?)
+sleep 1
+# remove TAP device
+/usr/bin/tunctl -d $TAP_DEVICE
+

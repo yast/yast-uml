@@ -1,0 +1,194 @@
+#! /bin/sh
+# Copyright (c) 2004 SUSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# Author: Ladislav Slezak
+# Please send feedback to http://www.suse.de/feedback/
+#
+# /etc/init.d/uml
+#
+### BEGIN INIT INFO
+# Provides:          uml
+# Required-Start:    $syslog $network $remote_fs
+# X-UnitedLinux-Should-Start: $time
+# Required-Stop:     $syslog $network $remote_fs
+# X-UnitedLinux-Should-Stop: $time
+# Default-Start:
+# Default-Stop:      0 1 2 3 5 6
+# Short-Description: UML (User Mode Linux) virtual machine
+# Description:       Start UML virtual machines.
+#	Only UML machines which have automatic start enabled are started. Other
+#	UML machines have to be started manually using 'rcuml start <uml_id>'
+#	command
+### END INIT INFO
+
+
+# check for missing binaries (stale symlinks should not happen)
+UML_START=/usr/lib/YaST2/bin/start-uml
+
+# source /etc/rc.status file
+. /etc/rc.status
+
+# reset status of this service
+rc_reset
+
+function uml_clear() {
+# unset variables from config file
+    unset USERNAME
+    unset STARTMODE
+}
+
+function uml_read() {
+    . $CONFIG
+}
+
+function uml_reread() {
+    uml_clear
+    uml_read
+}
+
+
+function uml_checkisrunning() {
+    if [ -n $USERNAME ]; then
+	ps -U $USERNAME u 2> /dev/null | grep "^$USERNAME .* \\./linux" > /dev/null
+    fi
+}
+
+function uml_isrunning() {
+    echo -n "$USERNAME"
+    uml_checkisrunning
+    rc_status -v
+}
+
+
+function uml_start() {
+    echo -n "$USERNAME"
+    # check whether UML is running
+    uml_checkisrunning
+
+    if [ $? != "0" ]; then
+	if [ -n "$SELECTED_UML" ]; then
+	    # start selected UML
+	    rc_reset
+	    (cd "$HOMEDIR"; $UML_START $CONFIG 2> /dev/null > /dev/null) &
+	    rc_status -v
+	elif [ "$STARTMODE" == "onboot" ]; then
+	    # UML is not specified
+	    # start all UMLs which have start mode "onboot"
+	    rc_reset
+	    (cd "$HOMEDIR"; $UML_START $CONFIG 2> /dev/null > /dev/null) &
+	    rc_status -v
+	else
+	    # skipped
+	    rc_status -s
+	fi
+    else
+	# already running
+	rc_reset
+	rc_status -v
+    fi
+}
+
+function uml_stop() {
+    echo -n "$USERNAME"
+    # check whether UML is running
+    uml_checkisrunning
+
+    if [ $? == "0" ]; then
+	# send Ctrl+Alt+Del to the UML machine
+	/usr/bin/uml_mconsole $HOMEDIR/.uml/$USERNAME/mconsole cad > /dev/null 2> /dev/null
+
+	# wait for shutdown (60s timeout)
+	for i in `seq 0 20`; do
+	    uml_checkisrunning || break
+	    echo -n " ."
+	    sleep 3;
+	done
+
+	# flush UML's cache and halt it (safer than killing)
+	# if it's still running
+	uml_checkisrunning && {
+	    /usr/bin/uml_mconsole $HOMEDIR/.uml/$USERNAME/mconsole stop > /dev/null 2> /dev/null && \
+	    /usr/bin/uml_mconsole $HOMEDIR/.uml/$USERNAME/mconsole sysrq s > /dev/null 2> /dev/null && \
+	    /usr/bin/uml_mconsole $HOMEDIR/.uml/$USERNAME/mconsole halt > /dev/null 2> /dev/null
+	}
+
+	rc_status -r
+	rc_status -v
+    else
+	rc_status -u
+    fi
+}
+
+# select one or all configs
+if [ -n "$2" ]; then
+    CONFIGS=/etc/sysconfig/uml/$2.conf
+    SELECTED_UML=$2
+else
+    CONFIGS=`/bin/ls -1 /etc/sysconfig/uml/*.conf 2>/dev/null`
+fi
+
+
+case "$1" in
+    start)
+	echo "Starting UML"
+	## Start UML machines
+
+	for CONFIG in $CONFIGS; do
+	    uml_reread
+	    uml_start
+	done
+	;;
+    stop)
+	echo "Shutting down UML"
+	## Stop UML machines
+
+	for CONFIG in $CONFIGS; do
+	    uml_reread
+	    uml_stop
+	done
+	;;
+    try-restart|condrestart)
+	## unsupported
+	rc_failed 3
+	rc_status -v
+	;;
+    restart)
+	## Stop the service and regardless of whether it was
+	## running or not, start it again.
+	$0 stop $2
+	$0 start $2
+
+	# Remember status and be quiet
+	rc_status
+	;;
+    force-reload)
+	## unsupported
+	rc_failed 3
+	rc_status -v
+	;;
+    reload)
+	## reload is not supported
+	rc_failed 3
+	rc_status -v
+	;;
+    status)
+	echo "UML status:"
+	## check status of UML machines
+
+	for CONFIG in $CONFIGS; do
+	    uml_reread
+	    uml_isrunning
+	done
+	;;
+    probe)
+	## probe is not supported
+	rc_failed 3
+	rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
+	exit 1
+	;;
+esac
+rc_exit
