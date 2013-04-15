@@ -10,5 +10,5 @@ use other virtualization systems (like Xen, KVM, VirtualBox...).
 GIT
 ---
 
-If you want to see the last state check the [*master_old*](tree/master_old) branch.
+If you want to see the last state check the [*master_old*](../master_old) branch.
 
